@@ -119,7 +119,7 @@ node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 
 ### 说明
 
-- **目标公众号 AppID**：用户未指定时，用 `accounts` 中 `selected: true`（命令行可写 `default` 或 `-`）。
+- **目标公众号 AppID**：用户未指定时，命令行写 `-` / `default`，脚本会取 `accounts` 中 `selected: true`（若选中的是平台号 `appId: default` 则走平台默认公众号；若是 `wx…` 则推到该号）。用户点名某个号时传入对应 AppID。
 - **目标云电脑**：用户未指定时，用 `instances` 中 `selected: true`（命令行写 `-`）。
 - **接口**：`config.json` 的 `apiBase`（缺省 `https://api.pcloud.ac.cn/openAccessService`），POST JSON；公众号 `action: sendToWechat`，云电脑 `action: sendToCloud`。
 - **超时**：推送链路较长，若返回「超时」可视为已成功，勿重复狂推；请用户看服务通知、草稿箱或云电脑站点。

@@ -2,7 +2,10 @@
 /**
  * 推送到公众号。config.json 和此脚本应在同一目录；支持 HTML 和图片模式，HTML 应放在同目录。
  *
- * 首参为目标公众号 AppID（default、- 或空字符串表示平台提供的公众号；wx 开头为自定义公众号），第二参为 html 或 img：
+ * 首参为目标公众号 AppID：
+ *   - / default / 空 → 使用 config.accounts 中 selected:true（若 selected 为平台号则走平台默认）
+ *   - wx… → 指定自定义公众号
+ * 第二参为 html 或 img：
  *   node push-to-wechat-mp.js <targetAppId> html <HTML 文件名> [sendMode]
  *   node push-to-wechat-mp.js <targetAppId> img '<JSON数组>' <title> <content> [sendMode]
  * 示例：
@@ -162,29 +165,47 @@ function postJson(urlStr, body, timeoutMs = 120000) {
   });
 }
 
-function isDefaultAppIdTarget(s) {
+function isPlatformAppId(s) {
+  const t = String(s ?? '').trim().toLowerCase();
+  return t === '' || t === 'default';
+}
+
+/** CLI 占位：表示「用 config 里 selected:true」，不是强制平台默认号 */
+function isSelectedPlaceholder(s) {
   const t = String(s ?? '').trim().toLowerCase();
   return t === '' || t === 'default' || t === '-';
 }
 
-/** @returns {string|undefined} appId 传给接口：appId；平台提供返回 undefined */
+/**
+ * @returns {string|undefined} 传给接口的 appId；平台提供公众号返回 undefined
+ */
 function resolvePushAppId(cfg, targetAppIdFromCli) {
-  if (isDefaultAppIdTarget(targetAppIdFromCli)) {
-    return undefined;
-  }
-  const tid = String(targetAppIdFromCli).trim();
-  if (cfg.accounts && Array.isArray(cfg.accounts)) {
-    const found = cfg.accounts.some(
-      (a) =>
-        a &&
-        a.appId &&
-        String(a.appId).toLowerCase() === tid.toLowerCase()
-    );
-    if (!found) {
-      console.error(
-        '提示: 传入的 AppID 未出现在 config.accounts 中，仍将按接口规则推送。'
-      );
+  const accounts = Array.isArray(cfg.accounts) ? cfg.accounts : [];
+
+  if (isSelectedPlaceholder(targetAppIdFromCli)) {
+    const selected = accounts.find((a) => a && a.selected && a.appId);
+    if (!selected) {
+      // 无 selected：回退平台默认号
+      return undefined;
     }
+    const sid = String(selected.appId).trim();
+    if (isPlatformAppId(sid)) return undefined;
+    return sid;
+  }
+
+  const tid = String(targetAppIdFromCli).trim();
+  if (isPlatformAppId(tid)) return undefined;
+
+  const found = accounts.some(
+    (a) =>
+      a &&
+      a.appId &&
+      String(a.appId).toLowerCase() === tid.toLowerCase()
+  );
+  if (!found) {
+    console.error(
+      '提示: 传入的 AppID 未出现在 config.accounts 中，仍将按接口规则推送。'
+    );
   }
   return tid;
 }
@@ -193,13 +214,13 @@ async function main() {
   const args = process.argv.slice(2);
   if (args.length < 2) {
     throw new Error(
-      '用法:\n  node push-to-wechat-mp.js <targetAppId> html <文件名.html> [sendMode]\n  node push-to-wechat-mp.js <targetAppId> img \'<JSON>\' <title> <content> [sendMode]\n  targetAppId：default、- 或空字符串表示平台提供；wx 开头为自定义公众号。'
+      '用法:\n  node push-to-wechat-mp.js <targetAppId> html <文件名.html> [sendMode]\n  node push-to-wechat-mp.js <targetAppId> img \'<JSON>\' <title> <content> [sendMode]\n  targetAppId：- / default / 空 = config 中 selected:true；wx… = 指定公众号；selected 为平台号时走平台默认。'
     );
   }
 
   if (args[0] === 'html' || args[0] === 'img') {
     throw new Error(
-      '首参须为目标公众号 AppID（平台提供请写 default）。示例:\n  node push-to-wechat-mp.js targetAppId html 你的文件.html draft'
+      '首参须为目标公众号 AppID（未指定时用 - 表示 selected:true）。示例: node push-to-wechat-mp.js - html 你的文件.html draft'
     );
   }
 
