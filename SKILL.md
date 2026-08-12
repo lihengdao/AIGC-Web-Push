@@ -33,7 +33,7 @@ AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存�
 **说明：**
 
 - **微信公众号**：可选平台提供公众号，或扫码授权自己的公众号并填写 AppID / sn。
-- **云电脑**：向导只能选择**已开通**的云电脑；没有机器时，请先到 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 开通并在控制台绑定站点账号，再回向导刷新。
+- **云电脑**：向导会列出**已开通**的全部云电脑并写入 `instances`；没有机器时，请先到 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 开通并在控制台绑定站点账号，再回向导刷新。默认推送目标为向导选中的那一台（`selected: true`）。
 
 ---
 
@@ -53,8 +53,8 @@ EOF
 
 `config.json` 说明：
 
-- `accounts`：选了公众号通道时才有；`selected: true` 为默认公众号。
-- `instances`：选了云电脑通道时才有；`selected: true` 为默认云电脑。
+- `accounts`：选了公众号通道时才有；**写入可用公众号列表**，其中 `selected: true` 为默认公众号（有且仅一项）。
+- `instances`：选了云电脑通道时才有；**写入已开通云电脑全量列表**，其中 `selected: true` 为默认云电脑（有且仅一项）。
 - `skillKey`：向导签发，推送必带；勿手写。
 
 ---
