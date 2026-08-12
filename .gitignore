@@ -1,6 +1,7 @@
-# Local secrets from the config wizard — do not commit
-config.json
+﻿config.json
 *.log
 .DS_Store
 Thumbs.db
 node_modules/
+
+aigc-web-push/

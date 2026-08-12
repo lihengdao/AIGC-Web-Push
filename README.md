@@ -1,4 +1,4 @@
-# AIGC Web Push
+﻿# AIGC Web Push
 
 AI 内容生成与全网推送技能（文章 / 贴图 / 视频 URL），支持微信公众号与云电脑通道。
 
@@ -12,7 +12,7 @@ openclaw skills install @lihengdao/aigc-web-push
 
 ## 配置向导
 
-https://app.pcloud.ac.cn/design/content-publish.html
+https://app.pcloud.ac.cn/design/aigc-web-push.html
 
 扫码配置后，将向导 JSON 保存为本目录下的 `config.json`（见 `config.example.json`）。
 

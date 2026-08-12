@@ -1,15 +1,15 @@
 ---
-name: content-publish
+name: aigc-web-push
 description: 支持通过 AI 生成符合规范的图文（文章和贴图），并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或云电脑全球任何站点；兼容其它技能产出的图文、图片与公网视频 URL。
 ---
 
-# content-publish · 内容生成与全网推送
+# aigc-web-push · 内容生成与全网推送
 
 ## 文件路径与作用
 
 | 文件 | 位置 | 作用 |
 | --- | --- | --- |
-| **SKILL.md** | `content-publish/` | 本说明 |
+| **SKILL.md** | `aigc-web-push/` | 本说明 |
 | **design.md** | 同上 | HTML 格式规范 |
 | **design_cover.md** | 同上 | 封面 HTML 规范 |
 | **Humanizer-zh.md** / **Humanizer.md** | 同上 | 去 AI 味（中 / 英） |
@@ -25,10 +25,10 @@ description: 支持通过 AI 生成符合规范的图文（文章和贴图），
 
 | 项 | 内容 |
 | --- | --- |
-| **配置向导地址** | [https://app.pcloud.ac.cn/design/content-publish.html](https://app.pcloud.ac.cn/design/content-publish.html) |
+| **配置向导地址** | [https://app.pcloud.ac.cn/design/aigc-web-push.html](https://app.pcloud.ac.cn/design/aigc-web-push.html) |
 | **流程** | AI 发向导给用户 → 用户微信扫码 → 选择通道（公众号 / 云电脑，可多选）→ 按向导完成授权或选机 → 用户复制发给 AI |
 
-AI 检查 **content-publish 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户扫码配置。
+AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户扫码配置。
 
 **说明：**
 
@@ -39,7 +39,7 @@ AI 检查 **content-publish 目录** 下是否存在 `config.json`。如果不�
 
 ## 第二步：配置文件
 
-AI 将配置向导得到的配置参数保存为 **content-publish 目录** 下的 `config.json`，编码 **UTF-8**。
+AI 将配置向导得到的配置参数保存为 **aigc-web-push 目录** 下的 `config.json`，编码 **UTF-8**。
 
 在已进入该目录时，可：
 
@@ -77,14 +77,14 @@ EOF
 ### 推送 HTML（公众号）
 
 ```bash
-cd content-publish
+cd aigc-web-push
 node push.js wechat targetAppId html 你的文件.html
 ```
 
 ### 推送图片链接（公众号）
 
 ```bash
-cd content-publish
+cd aigc-web-push
 node push.js wechat targetAppId img '["https://cdn.example.com/1.png","https://cdn.example.com/2.png"]' "标题" "正文"
 ```
 
@@ -95,14 +95,14 @@ node push.js wechat targetAppId img '["https://cdn.example.com/1.png","https://c
 首参为云电脑 ID（`-` / `default` 表示用 `config.json` 里 `selected:true` 的云电脑）；可选 `categoryId`（`article` 默认 / `newspic` / `video`）、`publishMode`（`draft` 默认）。
 
 ```bash
-cd content-publish
+cd aigc-web-push
 node push.js cloud - html 你的文件.html article draft
 ```
 
 ### 推送图片链接（云电脑）
 
 ```bash
-cd content-publish
+cd aigc-web-push
 node push.js cloud - img '["https://cdn.example.com/1.png"]' "标题" draft
 ```
 
@@ -111,7 +111,7 @@ node push.js cloud - img '["https://cdn.example.com/1.png"]' "标题" draft
 本技能**不生成**视频。可推送用户提供的公网视频 URL。公众号不支持视频。
 
 ```bash
-cd content-publish
+cd aigc-web-push
 node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 ```
 
