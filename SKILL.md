@@ -1,6 +1,6 @@
 ---
 name: content-publish
-description: 支持通过 AI 生成符合规范的图文（文章和贴图），并推送到微信公众号草稿箱和/或云电脑全网站点；兼容其它技能产出的图文、图片与公网视频 URL。通过配置向导扫码授权，无需泄露公众号 Secret，无需配置 IP 白名单。
+description: 支持通过 AI 生成符合规范的图文（文章和贴图），并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或云电脑全球任何站点；兼容其它技能产出的图文、图片与公网视频 URL。
 ---
 
 # content-publish · 内容生成与全网推送
@@ -28,18 +28,18 @@ description: 支持通过 AI 生成符合规范的图文（文章和贴图），
 | **配置向导地址** | [https://app.pcloud.ac.cn/design/content-publish.html](https://app.pcloud.ac.cn/design/content-publish.html) |
 | **流程** | AI 发向导给用户 → 用户微信扫码 → 选择通道（公众号 / 云电脑，可多选）→ 按向导完成授权或选机 → 用户复制发给 AI |
 
-AI 检查 **content-publish 目录** 下是否存在 **`config.json`**。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户扫码配置。
+AI 检查 **content-publish 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户扫码配置。
 
 **说明：**
 
-- **微信公众号**：与旧版 `wechat-mp-push` 相同——可选平台提供公众号，或扫码授权自己的公众号并填写 AppID / sn。
+- **微信公众号**：可选平台提供公众号，或扫码授权自己的公众号并填写 AppID / sn。
 - **云电脑**：向导只能选择**已开通**的云电脑；没有机器时，请先到 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 开通并在控制台绑定站点账号，再回向导刷新。
 
 ---
 
 ## 第二步：配置文件
 
-AI 将配置向导得到的配置参数保存为 **content-publish 目录** 下的 **`config.json`**，编码 **UTF-8**。
+AI 将配置向导得到的配置参数保存为 **content-publish 目录** 下的 `config.json`，编码 **UTF-8**。
 
 在已进入该目录时，可：
 
@@ -53,9 +53,9 @@ EOF
 
 `config.json` 说明：
 
-- **`accounts`**：选了公众号通道时才有；`selected: true` 为默认公众号。
-- **`instances`**：选了云电脑通道时才有；`selected: true` 为默认云电脑。
-- **`skillKey`**：向导签发，推送必带；勿手写。
+- `accounts`：选了公众号通道时才有；`selected: true` 为默认公众号。
+- `instances`：选了云电脑通道时才有；`selected: true` 为默认云电脑。
+- `skillKey`：向导签发，推送必带；勿手写。
 
 ---
 
