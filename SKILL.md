@@ -33,7 +33,17 @@ AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存�
 **说明：**
 
 - **微信公众号**：可选平台提供公众号，或扫码授权自己的公众号并填写 AppID / sn。
-- **云电脑**：向导会列出**已开通**的全部云电脑并写入 `instances`；没有机器时，请先到 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 开通并在控制台绑定站点账号，再回向导刷新。默认推送目标为向导选中的那一台（`selected: true`）。
+- **云电脑**：向导会列出**已开通**的全部云电脑并写入 `instances`；没有机器时，请先到下方「云电脑管理」开通，再回向导刷新。默认推送目标为向导选中的那一台（`selected: true`）。
+
+**云电脑相关管理（不在本技能目录内操作）：**
+
+| 事项 | 在哪里做 |
+| --- | --- |
+| 开通 / 开关机 / 销毁云电脑 | [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) |
+| 在云电脑上绑定站点账号（文章 / 贴图 / 视频等） | 同上：进入对应云电脑控制台完成登录与账号绑定 |
+| 选哪台机写入 `config.json` | 本技能配置向导；改默认机可改 `instances` 里的 `selected`，或重新走向导 |
+
+向导**不能**开通机器，也**不能**代绑站点账号；机器与账号都准备好后，再扫码配置才能推送。
 
 ---
 
@@ -115,7 +125,7 @@ cd aigc-web-push
 node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 ```
 
-云电脑上须已绑定 `contentType=video` 的账号。只有本地文件、没有公网 URL 时无法推送。
+云电脑上须已绑定 `contentType=video` 的账号（在 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 控制台绑定）。只有本地文件、没有公网 URL 时无法推送。
 
 ### 说明
 
