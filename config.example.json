@@ -1,0 +1,47 @@
+{
+  "_fileRole": "字段说明 + 示例。正式 config.json 只保留向导输出的业务键（去掉本文件中的 _fileRole / fieldsHelp / *Example*）。",
+  "fieldsHelp": {
+    "apiBase": "缺省 https://api.pcloud.ac.cn/openAccessService",
+    "openId": "扫码得到的微信 openId，禁止编造",
+    "skillKey": "扫码后服务端签发的业务随机密钥，与 openId 绑定；推送必带。重新扫码会轮换",
+    "accounts": "公众号列表；selected:true 为默认推送目标；平台默认号可用 appId: default",
+    "instances": "云电脑列表；selected:true 为默认推送目标；instanceId 来自 listCloudInstances"
+  },
+  "version": 1,
+  "description": "内容生成与全网推送（公众号 + 云电脑）",
+  "apiBase": "https://api.pcloud.ac.cn/openAccessService",
+  "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+  "skillKey": "请用向导扫码后生成，勿手写",
+  "accounts": [
+    {
+      "name": "平台提供的公众号",
+      "appId": "default",
+      "selected": true
+    }
+  ],
+  "instances": [
+    {
+      "instanceId": "ins-xxxxxxxx",
+      "instanceName": "我的云电脑",
+      "selected": true
+    }
+  ],
+  "sendToWechatExample": {
+    "action": "sendToWechat",
+    "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "skillKey": "<from-wizard>",
+    "appId": "",
+    "title": "文章标题",
+    "content": "<p>HTML</p>"
+  },
+  "sendToCloudExample": {
+    "action": "sendToCloud",
+    "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "skillKey": "<from-wizard>",
+    "serverInstanceIds": ["ins-xxxxxxxx"],
+    "categoryId": "article",
+    "title": "文章标题",
+    "content": "<html>…</html>",
+    "publishMode": "draft"
+  }
+}
