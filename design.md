@@ -287,6 +287,14 @@ p, h1, h2, h3, section {
 
 **宽度 375px，默认 3:4 竖图比例，高度 500px**
 
+**⚠️ 核心约束（各页高度必须一致）**：
+- 每张页是固定比例的独立画面；页与页之间可截图分割，每张截图是一个完整页面
+- 所有 `.pagination` 写死**同一**固定 `height`（按宽度与版式比例计算）
+- ❌ 禁止 `height: auto` / `min-height` 撑开 / 按内容决定高度
+- ❌ 禁止各页高度不一致（末页内容少也须同一 height，宁可留白）
+- ❌ 禁止使用 `aspect-ratio`（高度用算出的固定 px，不用比例属性）
+- ❌ 禁止使用 `overflow: scroll` / `overflow: auto`
+
 ### 尺寸对照
 
 | 比例 | 高度计算 | 示例（375px） |
@@ -294,6 +302,8 @@ p, h1, h2, h3, section {
 | 1:1  | 宽 × 1   | 375px        |
 | 3:4  | 宽 × 4/3 | 500px        |
 | 4:3  | 宽 × 3/4 | 281px        |
+
+改比例或宽度时：先算统一 height，再写进**每一个** `.pagination`；不要「按页内容」分别调整。
 
 ### HTML 结构规则
 
@@ -324,7 +334,8 @@ p, h1, h2, h3, section {
 .pagination {
     width: 375px;
     max-width: 100%;
-    height: 500px; /* 3:4 比例，按需调整 */
+    /* 所有页必须同一固定值；宽375 + 3:4 → 500。勿 height:auto / 按内容撑开 */
+    height: 500px;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;

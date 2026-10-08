@@ -73,7 +73,7 @@ EOF
 
 1. 用户发送创作要求后，AI 必须根据 `design.md` 生成标准 HTML。若涉及文本文章，须按 `Humanizer-zh.md`（中文）或 `Humanizer.md`（英文）去 AI 味。两种类型：
    - **文章**：通用类型，页面默认宽度 677px
-   - **贴图**：图文卡片（小绿书），页面默认宽度 375px，固定分页比例（默认 3:4）。推公众号时后台会把 HTML 转成图片
+   - **贴图**：图文卡片（小绿书），页面默认宽度 375px，固定分页比例（默认 3:4）；所有 `.pagination` 须同一固定 height，禁止各页高度不一致。推公众号时后台会把 HTML 转成图片
 2. 生成主 HTML 后，若页面中没有引用图片，可再按 `design_cover.md` 根据 title 生成封面 HTML，命名为 `你的文件_cover.html`（与主 HTML 同目录；云电脑与公众号推送均会自动附带）
 
 **注意：** 无论文章还是贴图，必须先阅读 `design.md`；主 HTML 跟 `design.md`，封面跟 `design_cover.md`。
