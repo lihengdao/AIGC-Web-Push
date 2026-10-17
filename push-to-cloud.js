@@ -238,9 +238,18 @@ async function main() {
     const res = await postJson(apiBase, body);
     console.log('HTTP', res.status, JSON.stringify(res.body, null, 2));
     if (!res.body || res.body.success === false) process.exit(2);
+    // 投递入队即成功；云电脑实际发文耗时长，勿等待、勿重推
+    const taskId = res.body.taskId || (res.body.results && res.body.results[0] && res.body.results[0].taskId);
+    console.log(
+      '投递成功（已入队）' +
+        (taskId ? ' taskId=' + taskId : '') +
+        '。云端执行较慢，到此结束，勿轮询、勿重复推送。'
+    );
   } catch (e) {
     if (/timeout/i.test(String(e.message || ''))) {
-      console.warn('请求超时：任务可能已在后台受理，请查看云电脑任务列表，勿重复推送。');
+      console.warn(
+        '请求超时：任务可能已投递入队。云端执行较慢，请视为投递成功，勿重复推送。'
+      );
       process.exit(0);
     }
     console.error(e);
