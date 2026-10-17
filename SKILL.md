@@ -25,25 +25,25 @@ description: 支持通过 AI 生成文章和图文卡片，并推送到微信公
 
 | 项 | 内容 |
 | --- | --- |
-| **配置向导地址** | [https://app.pcloud.ac.cn/design/aigc-web-push.html](https://app.pcloud.ac.cn/design/aigc-web-push.html) |
-| **流程** | AI 发向导给用户 → 用户微信扫码 → 选择通道（公众号 / 云电脑，可多选）→ 按向导完成授权或选机 → 用户复制发给 AI |
+| **配置向导地址** | [https://design.pcloud.ac.cn/aigc-web-push.html](https://design.pcloud.ac.cn/aigc-web-push.html) |
+| **流程** | AI 发向导给用户 → 已在 design 登录则直接继续，否则微信扫码 → 公众号可选用已授权的号并设为默认，没有则跳过 → 云电脑可点一台设为默认，没有则直接生成配置 → 用户复制发给 AI |
 
-AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户扫码配置。
+AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户完成配置。
 
 **说明：**
 
-- **微信公众号**：扫码授权自己的公众号并填写 AppID / sn。
-- **云电脑**：向导会列出**已开通**的全部云电脑并写入 `instances`；没有机器时，请先到下方「云电脑管理」开通，再回向导刷新。默认推送目标为向导选中的那一台（`selected: true`）。
+- **微信公众号**：已授权的号直接点选，其中一项为默认（`selected: true`，即首选推送目标）。没有公众号可以跳过，配置里不写 `accounts`。新号才扫码授权并填写 AppID / sn。
+- **云电脑**：向导会列出**已开通**的全部云电脑并写入 `instances`。没有机器也可以直接生成配置，配置里不写 `instances`。点选的那一台是默认（首选，`selected: true`）。
 
 **云电脑相关管理（不在本技能目录内操作）：**
 
 | 事项 | 在哪里做 |
 | --- | --- |
-| 开通 / 开关机 / 销毁云电脑 | [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) |
+| 开通 / 开关机 / 销毁云电脑 | [云电脑管理](https://design.pcloud.ac.cn/#/manage?tab=server) |
 | 在云电脑上绑定站点账号（文章 / 贴图 / 视频等） | 同上：进入对应云电脑控制台完成登录与账号绑定 |
 | 选哪台机写入 `config.json` | 本技能配置向导；改默认机可改 `instances` 里的 `selected`，或重新走向导 |
 
-向导**不能**开通机器，也**不能**代绑站点账号；机器与账号都准备好后，再扫码配置才能推送。
+向导**不能**开通机器，也**不能**代绑站点账号。没有公众号或云电脑也可以先生成配置；要用哪条通道，再补对应的号或机器。
 
 ---
 
@@ -63,8 +63,8 @@ EOF
 
 `config.json` 说明：
 
-- `accounts`：选了公众号通道时才有；**写入可用公众号列表**，其中 `selected: true` 为默认公众号（有且仅一项）。
-- `instances`：选了云电脑通道时才有；**写入已开通云电脑全量列表**，其中 `selected: true` 为默认云电脑（有且仅一项）。
+- `accounts`：有公众号才写入。其中 `selected: true` 为默认公众号（有且仅一项）。没有公众号则省略。
+- `instances`：有云电脑才写入已开通全量列表。其中 `selected: true` 为默认云电脑（有且仅一项）。没有云电脑则省略。
 - `skillKey`：向导签发，推送必带；勿手写。
 
 ---
@@ -127,7 +127,7 @@ cd aigc-web-push
 node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 ```
 
-云电脑上须已绑定 `contentType=video` 的账号（在 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 控制台绑定）。只有本地文件、没有公网 URL 时无法推送。
+云电脑上须已绑定 `contentType=video` 的账号（在 [云电脑管理](https://design.pcloud.ac.cn/#/manage?tab=server) 控制台绑定）。只有本地文件、没有公网 URL 时无法推送。
 
 ### 说明
 
