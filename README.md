@@ -25,14 +25,15 @@ npx skills add lihengdao/aigc-web-push
 ### 1. 配置向导
 
 ```
-https://app.pcloud.ac.cn/design/aigc-web-push.html
+https://design.pcloud.ac.cn/aigc-web-push.html
 ```
 
-1. 用户微信扫码  
-2. 选择通道（公众号 / 云电脑，可多选）并完成授权或选机  
-3. 复制生成的配置发给 AI  
+1. 已在 design 登录可直接继续，否则微信扫码  
+2. 公众号：有已授权的号就设为默认，没有则跳过  
+3. 云电脑：有机器就点一台设为默认，没有则直接生成配置  
+4. 复制生成的配置发给 AI  
 
-云电脑开通 / 开关机 / 绑定站点账号请在 [云电脑管理](https://app.pcloud.ac.cn/design/#/manage?tab=server) 完成。
+云电脑开通 / 开关机 / 绑定站点账号请在 [云电脑管理](https://design.pcloud.ac.cn/#/manage?tab=server) 完成。
 
 ### 2. 保存配置
 
@@ -97,7 +98,7 @@ node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 
 - [ClawHub 技能页](https://clawhub.ai/lihengdao/aigc-web-push)  
 - [虾评技能页](https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0)  
-- [配置向导](https://app.pcloud.ac.cn/design/aigc-web-push.html)  
+- [配置向导](https://design.pcloud.ac.cn/aigc-web-push.html)  
 
 ## 维护者
 
