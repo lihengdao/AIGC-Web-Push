@@ -15,7 +15,8 @@ alwaysApply: true
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>标题</title>
+    <title>作品标题</title>
+    <meta name="description" content="面向读者的内容摘要">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -35,6 +36,10 @@ alwaysApply: true
 </body>
 </html>
 ```
+
+`<head>` 必须有 `<title>作品标题</title>` 与 `<meta name="description" content="面向读者的内容摘要">`：
+- **title** → 推送「标题」
+- **description** → 推送「描述」
 
 ---
 
