@@ -134,7 +134,8 @@ node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 - **目标公众号 AppID**：用户未指定时，命令行写 `-` / `default`，脚本会取 `accounts` 中 `selected: true` 的 `wx…` AppID。用户点名某个号时传入对应 AppID。
 - **目标云电脑**：用户未指定时，用 `instances` 中 `selected: true`（命令行写 `-`）。
 - **接口**：`config.json` 的 `apiBase`（缺省 `https://api.pcloud.ac.cn/openAccessService`），POST JSON；公众号 `action: sendToWechat`，云电脑 `action: sendToCloud`。
-- **超时**：推送链路较长，若返回「超时」可视为已成功，勿重复狂推；请用户看服务通知、草稿箱或云电脑站点。
+- **云电脑成功标准（重要）**：`sendToCloud` / `push.js cloud` **只要投递成功（入队）就算完成**。云端实际登录站点、发文/贴图很耗时，AI **不要**等待发布结果、不要轮询、不要因「站点还没发出」而重推。接口返回 `success: true`（常带 `queued: true` / `taskId`）或提示超时但可能已受理 → 告知用户「已投递到云电脑」，结束本步。
+- **公众号超时**：推送链路较长，若返回「超时」可视为已受理，勿重复狂推；请用户看服务通知或草稿箱。
 
 ## 其它功能
 
