@@ -14,6 +14,8 @@
  *   node push-to-cloud.js - html article.html article draft
  *   node push-to-cloud.js ins-xxx img '["https://a.png"]' "标题" draft
  *   node push-to-cloud.js - video 'https://cdn.example.com/a.mp4' "标题" draft
+ *
+ * 视频封面：同目录 cover.html 或 video_cover.html 会作为 coverHtml 一并提交。
  */
 
 const https = require('https');
@@ -136,6 +138,15 @@ function resolveCoverHtmlForArticle(fileName, htmlPath) {
   return '';
 }
 
+/** 视频封面：同目录 cover.html / video_cover.html（与文章 coverHtml 同字段） */
+function resolveCoverHtmlForVideo() {
+  for (const name of ['cover.html', 'video_cover.html']) {
+    const p = path.join(DIR, name);
+    if (fs.existsSync(p)) return fs.readFileSync(p, 'utf8');
+  }
+  return '';
+}
+
 async function main() {
   const cfg = readJson('config.json');
   const openId = String(cfg.openId || '').trim();
@@ -179,7 +190,8 @@ async function main() {
       openId,
       skillKey,
       serverInstanceIds,
-      categoryId,
+      // openAccess 只认 categoryid（拒收 categoryId）
+      categoryid: categoryId,
       title: titleFromHtml(content),
       content,
       publishMode,
@@ -202,26 +214,33 @@ async function main() {
       openId,
       skillKey,
       serverInstanceIds,
-      categoryId: 'newspic',
+      categoryid: 'newspic',
       title,
       imgUrls: urls,
       publishMode,
       ...(content ? { content } : {}),
     };
   } else if (mode === 'video') {
-    // 与 auto-publish 一致：不传 HTML，只传公网视频 URL → 附件 video.mp4
+    // 成片公网 URL → video.mp4；封面与文章一样走 coverHtml（同目录 cover.html）
     const urls = parseImgUrlsArg(argv[2]);
     const title = String(argv[3] || '视频').trim() || '视频';
     const publishMode = String(argv[4] || 'draft').trim() || 'draft';
+    const coverHtml = resolveCoverHtmlForVideo();
+    if (!coverHtml) {
+      console.warn(
+        '同目录下找不到 cover.html / video_cover.html（本次跳过封面）'
+      );
+    }
     body = {
       action: 'sendToCloud',
       openId,
       skillKey,
       serverInstanceIds,
-      categoryId: 'video',
+      categoryid: 'video',
       title,
       imgUrls: urls,
       publishMode,
+      ...(coverHtml ? { coverHtml } : {}),
     };
   } else {
     throw new Error('第二参须为 html、img 或 video');
@@ -230,8 +249,9 @@ async function main() {
   console.log('推送到云电脑', {
     apiBase,
     serverInstanceIds,
-    categoryId: body.categoryId,
+    categoryid: body.categoryid,
     title: body.title,
+    hasCoverHtml: Boolean(body.coverHtml),
   });
 
   try {

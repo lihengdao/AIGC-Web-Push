@@ -4,6 +4,7 @@
     "apiBase": "缺省 https://api.pcloud.ac.cn/openAccessService",
     "openId": "扫码得到的微信 openId，禁止编造",
     "skillKey": "扫码后服务端签发的业务随机密钥，与 openId 绑定；推送必带。重新扫码会轮换",
+    "autoUpdate": "可选；false 关闭 push.js 推送前自动对齐 ClawHub（默认开启）",
     "accounts": "公众号列表；selected:true 为默认推送目标",
     "instances": "已开通云电脑全量列表；selected:true 为默认推送目标（有且仅一项）；instanceId 来自 listCloudInstances"
   },
@@ -12,6 +13,7 @@
   "apiBase": "https://api.pcloud.ac.cn/openAccessService",
   "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "skillKey": "请用向导扫码后生成，勿手写",
+  "autoUpdate": true,
   "accounts": [
     {
       "name": "我的订阅号",

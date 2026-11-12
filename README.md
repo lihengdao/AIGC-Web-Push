@@ -10,6 +10,7 @@
 - **图文生成** — 按 `design.md` 生成标准 HTML，并可用 Humanizer 去 AI 味
 - **双通道推送** — 微信公众号草稿箱，或云电脑绑定站点（文章 / 贴图 / 视频）
 - **统一入口** — `push.js` 覆盖公众号与云电脑推送
+- **自动升级** — 推送前对齐 ClawHub 最新版（保留 `config.json`）
 
 ## 安装
 
@@ -87,6 +88,20 @@ node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 - **SKILL.md** — 完整技能说明  
 - **design.md** / **design_cover.md** — HTML 与封面规范  
 - **config.example.json** — 配置字段说明  
+
+## 自动升级
+
+`node push.js …` 推送前会检查 ClawHub 是否有更新；有则自动升级技能文件后再推送（保留 `config.json`，约 24 小时检查一次）。
+
+关闭：`config.json` 设 `"autoUpdate": false`，或环境变量 `AIGC_WEB_PUSH_NO_UPDATE=1`。
+
+手动：
+
+```bash
+npx clawhub update aigc-web-push
+# 或
+npx skills update aigc-web-push
+```
 
 ## 注意事项
 

@@ -15,6 +15,9 @@ description: 支持通过 AI 生成文章和图文卡片，并推送到微信公
 | **Humanizer-zh.md** / **Humanizer.md** | 同上 | 去 AI 味（中 / 英） |
 | **config.json** | 同上 | 配置向导生成后的真实配置 |
 | **config.example.json** | 同上 | 字段说明 + 示例 |
+| **VERSION** | 同上 | 本地技能 semver（与 ClawHub 对齐） |
+| **package.json** | 同上 | 固定 CommonJS（`private`，不发 npm） |
+| **check-update.js** | 同上 | 推送前核对 / 自升级（由 `push.js` 调用） |
 | **push.js** | 同上 | 统一推送入口（公众号 / 云电脑） |
 | **push-to-wechat-mp.js** | 同上 | 公众号推送实现 |
 | **push-to-cloud.js** | 同上 | 云电脑推送实现 |
@@ -66,6 +69,26 @@ EOF
 - `accounts`：有公众号才写入。其中 `selected: true` 为默认公众号（有且仅一项）。没有公众号则省略。
 - `instances`：有云电脑才写入已开通全量列表。其中 `selected: true` 为默认云电脑（有且仅一项）。没有云电脑则省略。
 - `skillKey`：向导签发，推送必带；勿手写。
+- `autoUpdate`：可选；设为 `false` 可关闭推送前自动升级（默认开启）。
+
+---
+
+## 自动升级
+
+`push.js` 推送前会对照 [ClawHub](https://clawhub.ai/lihengdao/aigc-web-push) 最新版本；若本地落后则拉取技能文件并继续推送（**保留 `config.json`**）。同一目录 24 小时内只检查一次。网络失败不阻断推送。
+
+关闭方式（任一即可）：
+
+- `config.json` 写 `"autoUpdate": false`
+- 环境变量 `AIGC_WEB_PUSH_NO_UPDATE=1`
+
+手动升级：
+
+```bash
+npx clawhub update aigc-web-push
+# 或
+npx skills update aigc-web-push
+```
 
 ---
 
@@ -75,6 +98,8 @@ EOF
    - **文章**：通用类型，页面默认宽度 677px
    - **贴图**：图文卡片（小绿书），页面默认宽度 375px，固定分页比例（默认 3:4）；所有 `.pagination` 须同一固定 height，禁止各页高度不一致。推公众号时后台会把 HTML 转成图片
 2. 生成主 HTML 后，若页面中没有引用图片，可再按 `design_cover.md` 根据 title 生成封面 HTML，命名为 `你的文件_cover.html`（与主 HTML 同目录；云电脑与公众号推送均会自动附带）
+
+**贴图版式取向**：见 `design.md`「版式取向」。
 
 **注意：** 无论文章还是贴图，必须先阅读 `design.md`；主 HTML 跟 `design.md`，封面跟 `design_cover.md`。
 
@@ -126,6 +151,8 @@ node push.js cloud - img '["https://cdn.example.com/1.png"]' "标题" draft
 cd aigc-web-push
 node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
 ```
+
+若同目录存在 `cover.html` 或 `video_cover.html`，会作为 `coverHtml` 一并提交（与文章封面同字段）。
 
 云电脑上须已绑定 `contentType=video` 的账号（在 [云电脑管理](https://design.pcloud.ac.cn/#/manage?tab=server) 控制台绑定）。只有本地文件、没有公网 URL 时无法推送。
 
