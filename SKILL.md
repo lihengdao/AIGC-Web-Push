@@ -15,8 +15,7 @@ description: 支持通过 AI 生成文章和图文卡片，并推送到微信公
 | **Humanizer-zh.md** / **Humanizer.md** | 同上 | 去 AI 味（中 / 英） |
 | **config.json** | 同上 | 配置向导生成后的真实配置 |
 | **config.example.json** | 同上 | 字段说明 + 示例 |
-| **VERSION** | 同上 | 本地技能 semver（与 ClawHub 对齐） |
-| **package.json** | 同上 | 固定 CommonJS（`private`，不发 npm） |
+| **package.json** | 同上 | 固定 CommonJS（`private`，不发 npm）；`version` 与 ClawHub 对齐 |
 | **check-update.js** | 同上 | 推送前核对 / 自升级（由 `push.js` 调用） |
 | **push.js** | 同上 | 统一推送入口（公众号 / 云电脑） |
 | **push-to-wechat-mp.js** | 同上 | 公众号推送实现 |

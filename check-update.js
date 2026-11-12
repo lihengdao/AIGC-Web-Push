@@ -34,8 +34,46 @@ function readText(filePath) {
 }
 
 function readLocalVersion(dir) {
-  const raw = readText(path.join(dir, 'VERSION'));
-  return raw || '0.0.0';
+  // Prefer package.json（各 skill 商店都收 .json）；兼容旧包里的 VERSION
+  try {
+    const pkg = JSON.parse(
+      fs.readFileSync(path.join(dir, 'package.json'), 'utf8')
+    );
+    const v = pkg && String(pkg.version || '').trim();
+    if (v) return v;
+  } catch {
+    /* fall through */
+  }
+  const legacy = readText(path.join(dir, 'VERSION'));
+  return legacy || '0.0.0';
+}
+
+function writeLocalVersion(dir, version) {
+  const pkgPath = path.join(dir, 'package.json');
+  try {
+    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+    pkg.version = version;
+    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
+    return;
+  } catch {
+    /* create minimal pin if missing */
+  }
+  fs.writeFileSync(
+    pkgPath,
+    JSON.stringify(
+      {
+        name: 'aigc-web-push',
+        private: true,
+        version,
+        type: 'commonjs',
+        description:
+          'Local module type pin so push.js stays CommonJS under design/ (not an npm publish).',
+      },
+      null,
+      2
+    ) + '\n',
+    'utf8'
+  );
 }
 
 function parseSemver(v) {
@@ -190,12 +228,17 @@ async function downloadVersionFiles(dir, version) {
     written += 1;
   }
 
-  // 旧包可能没有 VERSION；升级后写入远端 semver，避免反复全量拉取
-  const versionPath = path.join(dir, 'VERSION');
-  const current = readText(versionPath);
-  if (!current || cmpSemver(current, version) < 0) {
-    fs.writeFileSync(versionPath, `${version}\n`, 'utf8');
+  // 升级后把 semver 写回 package.json，避免反复全量拉取
+  const current = readLocalVersion(dir);
+  if (!current || current === '0.0.0' || cmpSemver(current, version) < 0) {
+    writeLocalVersion(dir, version);
     written += 1;
+  }
+  // 清掉旧无扩展名 VERSION（部分商店如腾讯 SkillHub 拒收）
+  try {
+    fs.unlinkSync(path.join(dir, 'VERSION'));
+  } catch {
+    /* absent */
   }
 
   return written;
