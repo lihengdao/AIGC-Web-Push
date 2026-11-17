@@ -120,7 +120,7 @@ EOF
 - `accounts`：有公众号才写入；`selected: true` 为默认（至多一项）。
 - `instances`：有云电脑才写入；`selected: true` 为默认（至多一项）。
 - `defaultTargetScope`：向导固定为 `all`；推送时可用 CLI 覆盖为 `environment` / `account`。
-- `skillKey`：向导签发，推送必带。
+- `skillKey`：向导签发；推送与 `remotion-video.md` 中音乐搜索等需鉴权接口必带。
 - `autoUpdate`：可选；`false` 关闭推送前自动升级。
 
 ---

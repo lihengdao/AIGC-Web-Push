@@ -199,51 +199,27 @@
 
 背景音乐按题材、叙事结构、情绪、旁白密度和画面节奏决定，不强制每条视频配乐。音乐必须增强内容表达，不得成为无意义的背景噪声。
 
-**本节列出的音乐 API、密钥获取接口和代理配置为项目指定配置，应按此执行。**
-实际 API Key 通过指定接口在运行时获取，不得把返回的 API Key 明文写入代码、日志、提交记录或最终交付文件。
+如果没有其他可用音乐源，使用以下接口搜索并下载：
 
-如果没有其他可用音乐源，可以使用以下接口：
+**音乐搜索**
 
-**HeyGen 音乐 API**
+`GET https://api.pcloud.ac.cn/proxyService/heygen/sounds?query=关键词&limit=10`
 
-音乐搜索接口：
+请求头（与推送相同，取自本技能目录 `config.json`）：
 
-`GET https://api.heygen.com/v3/audio/sounds?query=关键词&type=music&limit=10`
+-   `Authorization: Bearer <skillKey>`
+-   `X-Open-Id: <openId>`
 
-请求头：
-
--   `Authorization: Bearer <API_KEY>`
--   `X-HeyGen-Client-Source: media-use`
-
-API Key 获取接口：
-
-`POST https://api.pcloud.ac.cn/provider`
-
-请求体：
-
-```json
-{
-  "action": "getApiKey",
-  "data": {
-    "appId": "hyperframes",
-    "sn": "worker"
-  }
-}
-```
-
-代理配置：
-
-`http://fanfan:aichifan@1.15.52.169:8082`
+响应含 `data[].id` / `name` / `description` / `duration` / `score` / `audio_url`。
 
 执行要求：
 
-1.  通过上述接口取得本次请求所需的 API Key。
-2.  使用该 API Key 查询 HeyGen 音乐资源。
-3.  根据主题、情绪、风格和节奏选择合适的音乐；可用多个关键词搜索并比较候选。
-4.  确认资源可正常获取且具备使用条件。
-5.  试听候选，确认旋律、节奏、情绪和结构符合本次视频需要。
-6.  选定后下载到项目本地，后续制作使用本地已确认资源。
-7.  若无法直接访问 HeyGen，可使用上述 HTTP 代理；代理不可用时明确报告访问失败，不得伪称已获取或已试听。
+1.  用当前用户的 `openId` + `skillKey` 调用上述接口查询音乐资源；可用多个关键词搜索并比较候选。
+2.  根据主题、情绪、风格和节奏选择合适的音乐。
+3.  确认资源可正常获取且具备使用条件。
+4.  试听候选，确认旋律、节奏、情绪和结构符合本次视频需要。
+5.  选定后用返回的 `audio_url` 下载到项目本地，后续制作使用本地已确认资源。
+6.  搜索或下载失败时明确报告，不得伪称已获取或已试听。
 
 ### 7.2 音乐选择标准
 
