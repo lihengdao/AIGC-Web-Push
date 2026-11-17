@@ -2,11 +2,12 @@
   "_fileRole": "字段说明 + 示例。正式 config.json 只保留向导输出的业务键（去掉本文件中的 _fileRole / fieldsHelp / *Example*）。",
   "fieldsHelp": {
     "apiBase": "缺省 https://api.pcloud.ac.cn/openAccessService",
-    "openId": "扫码得到的微信 openId，禁止编造",
-    "skillKey": "扫码后服务端签发的业务随机密钥，与 openId 绑定；推送必带。重新扫码会轮换",
+    "openId": "当前操作用户扫码得到的微信 openId；禁止编造；禁止共用他人 config",
+    "skillKey": "向导签发、与 openId 绑定；推送必带。重新扫码会轮换，旧 key 立即失效",
     "autoUpdate": "可选；false 关闭 push.js 推送前自动对齐 ClawHub（默认开启）",
-    "accounts": "公众号列表；selected:true 为默认推送目标",
-    "instances": "已开通云电脑全量列表；selected:true 为默认推送目标（有且仅一项）；instanceId 来自 listCloudInstances"
+    "accounts": "可用公众号（本人 + 企业授权 + 管理员可见）；selected:true 为默认；推送可用 name 或 appId",
+    "instances": "可用云电脑（本人 + 企业授权 + 管理员可见）；selected:true 为默认；推送可用 name 或 instanceId",
+    "defaultTargetScope": "向导固定 all；CLI 可临时覆盖为 environment | account"
   },
   "version": 1,
   "description": "内容生成与全网推送（公众号 + 云电脑）",
@@ -14,6 +15,7 @@
   "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
   "skillKey": "请用向导扫码后生成，勿手写",
   "autoUpdate": true,
+  "defaultTargetScope": "all",
   "accounts": [
     {
       "name": "我的订阅号",
@@ -49,6 +51,29 @@
     "categoryId": "article",
     "title": "文章标题",
     "content": "<html>…</html>",
-    "publishMode": "draft"
+    "publishMode": "draft",
+    "targetScope": "all"
+  },
+  "prepareMediaUploadExample": {
+    "action": "prepareMediaUpload",
+    "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "skillKey": "<from-wizard>",
+    "ext": "mp4",
+    "folder": "aigc-web-push"
+  },
+  "listCloudPublishTargetsExample": {
+    "action": "listCloudPublishTargets",
+    "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "skillKey": "<from-wizard>",
+    "serverInstanceId": "ins-xxxxxxxx",
+    "categoryId": "video"
+  },
+  "resolveCloudPublishTargetExample": {
+    "action": "resolveCloudPublishTarget",
+    "openId": "oXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+    "skillKey": "<from-wizard>",
+    "categoryId": "video",
+    "query": "抖音主号",
+    "prefer": "account"
   }
 }

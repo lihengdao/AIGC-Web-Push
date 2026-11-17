@@ -2,118 +2,70 @@
 
 [ClawHub](https://clawhub.ai/lihengdao/aigc-web-push) · [虾评Skill](https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0)
 
-支持通过 AI 生成文章和图文卡片，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
+支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号或经由云电脑推送至全球任意站点。
 
 ## 功能特性
 
-- **扫码配置** — 通过配置向导授权公众号 / 选择云电脑，支持多账号、多实例
-- **图文生成** — 按 `design.md` 生成标准 HTML，并可用 Humanizer 去 AI 味
-- **双通道推送** — 微信公众号草稿箱，或云电脑绑定站点（文章 / 贴图 / 视频）
-- **统一入口** — `push.js` 覆盖公众号与云电脑推送
-- **自动升级** — 推送前对齐 ClawHub 最新版（保留 `config.json`）
+- **扫码配置** — 授权公众号 / 默认云电脑（不预选环境或账号）
+- **一作品一目录** — 产出放在 `works/<日期>-<主题>/`，技能目录只留技能与配置
+- **图文生成** — `design.md` + Humanizer
+- **视频创作** — `remotion-video.md` + Remotion Agent Skills
+- **灵活推送** — 可按名称指定云电脑 / 环境 / 账号
+- **自动升级** — 推送前对齐 ClawHub（保留 `config.json`）
 
 ## 安装
-
-- **链接安装**：发送 [https://clawhub.ai/lihengdao/aigc-web-push](https://clawhub.ai/lihengdao/aigc-web-push) 给 AI
-- **命令行安装**：
 
 ```bash
 npx skills add lihengdao/aigc-web-push
 ```
 
+或发送 https://clawhub.ai/lihengdao/aigc-web-push 给 AI。
+
 ## 快速开始
 
-### 1. 配置向导
+### 1. 配置
 
+打开 https://design.pcloud.ac.cn/aigc-web-push.html ，扫码后把 JSON 存为技能目录下的 `config.json`。
+
+### 2. 建作品目录并创作
+
+```text
+works/20261117-demo/
+  main.html
+  main_cover.html          # 可选
+  # 或视频：
+  remotion/  audio/  out/aigc-video.mp4  cover.html
 ```
-https://design.pcloud.ac.cn/aigc-web-push.html
-```
 
-1. 已在 design 登录可直接继续，否则微信扫码  
-2. 公众号：有已授权的号就设为默认，没有则跳过  
-3. 云电脑：有机器就点一台设为默认，没有则直接生成配置  
-4. 复制生成的配置发给 AI  
+- 文章 / 贴图：按 `design.md`
+- 视频：按 `remotion-video.md`，先装并加载 Remotion Skills
 
-云电脑开通 / 开关机 / 绑定站点账号请在 [云电脑管理](https://design.pcloud.ac.cn/#/manage?tab=server) 完成。
+### 3. 推送
 
-### 2. 保存配置
-
-将配置保存为技能目录下的 `config.json`（UTF-8）。
-
-### 3. 写内容
-
-按 `design.md` 生成主 HTML；文本文章按 `Humanizer-zh.md` / `Humanizer.md` 去 AI 味。
-
-- **文章**：默认宽度 677px  
-- **贴图**：默认宽度 375px，固定分页比例（默认 3:4）  
-
-无内嵌图片时可再按 `design_cover.md` 生成 `你的文件_cover.html`。
-
-### 4. 推送
-
-统一入口：`push.js`。
-
-**公众号 · HTML**
+在技能目录执行（路径按实际作品目录调整）：
 
 ```bash
 cd aigc-web-push
-node push.js wechat targetAppId html 你的文件.html
+node push.js wechat - html ../works/20261117-demo/main.html
+node push.js wechat "我的订阅号" html ../works/20261117-demo/main.html
+node push.js cloud - html ../works/20261117-demo/main.html article draft
+node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft account "抖音主号"
+node push.js cloud - list-targets video
+node push.js cloud - resolve video "抖音主号" account
 ```
 
-**公众号 · 图片链接**
+## 文档
 
-```bash
-cd aigc-web-push
-node push.js wechat targetAppId img '["https://cdn.example.com/1.png"]' "标题" "正文"
-```
+- **SKILL.md** — 完整说明  
+- **design.md** — HTML（文章 / 贴图 / 封面）  
+- **remotion-video.md** — 视频成片规范  
+- **config.example.json** — 配置字段  
 
-**云电脑 · HTML**
+## 注意
 
-```bash
-cd aigc-web-push
-node push.js cloud - html 你的文件.html article draft
-```
-
-**云电脑 · 视频**（仅公网 URL）
-
-```bash
-cd aigc-web-push
-node push.js cloud - video 'https://cdn.example.com/xxx.mp4' "标题" draft
-```
-
-目标未指定时，命令行写 `-` / `default`，脚本会使用 `config.json` 中 `selected: true` 的公众号或云电脑。
-
-## 详细文档
-
-- **SKILL.md** — 完整技能说明  
-- **design.md** / **design_cover.md** — HTML 与封面规范  
-- **config.example.json** — 配置字段说明  
-
-## 自动升级
-
-`node push.js …` 推送前会检查 ClawHub 是否有更新；有则自动升级技能文件后再推送（保留 `config.json`，约 24 小时检查一次）。
-
-关闭：`config.json` 设 `"autoUpdate": false`，或环境变量 `AIGC_WEB_PUSH_NO_UPDATE=1`。
-
-手动：
-
-```bash
-npx clawhub update aigc-web-push
-# 或
-npx skills update aigc-web-push
-```
-
-## 注意事项
-
-- **云电脑**：投递成功（入队）即完成；后续发文很耗时，勿等待站点结果、勿重推  
-- **公众号**：链路较长时若返回「超时」可视为已受理，勿重复狂推；可在服务通知 / 草稿箱确认  
-- 勿将真实 `config.json` / `skillKey` 提交到公开仓库  
-
-## 相关链接
-
-- [ClawHub 技能页](https://clawhub.ai/lihengdao/aigc-web-push)  
-- [虾评技能页](https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0)  
-- [配置向导](https://design.pcloud.ac.cn/aigc-web-push.html)  
+- 云电脑：入队即完成，勿轮询、勿重推  
+- 视频仅云电脑；目标名称歧义时先确认再推  
+- 勿提交真实 `config.json` / `skillKey`
 
 ## 维护者
 

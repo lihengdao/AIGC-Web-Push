@@ -1,16 +1,11 @@
 #!/usr/bin/env node
 /**
- * 推送到公众号。config.json 和此脚本应在同一目录；支持 HTML 和图片模式，HTML 应放在同目录。
+ * 推送到公众号。config.json 与本脚本同目录。
  *
- * 首参为目标公众号 AppID：
- *   - / default / 空 → 使用 config.accounts 中 selected:true（若 selected 为平台号则走平台默认）
- *   - wx… → 指定自定义公众号
- * 第二参为 html 或 img：
- *   node push-to-wechat-mp.js <targetAppId> html <HTML 文件名> [sendMode]
- *   node push-to-wechat-mp.js <targetAppId> img '<JSON数组>' <title> <content> [sendMode]
- * 示例：
- *   node push-to-wechat-mp.js targetAppId html 你的文件.html draft
- *   node push-to-wechat-mp.js wxabcdef0123456789 img '["https://example.com/a.png"]' "标题" "正文" draft
+ *   node push-to-wechat-mp.js <targetAppId|-> html <HTML路径> [sendMode]
+ *   node push-to-wechat-mp.js <targetAppId|-> img '<JSON数组>' <title> <content> [sendMode]
+ *
+ * HTML / 封面放在作品目录（见 SKILL.md「作品目录」），勿堆在技能根目录。
  */
 
 const https = require('https');
@@ -184,10 +179,7 @@ function resolvePushAppId(cfg, targetAppIdFromCli) {
 
   if (isSelectedPlaceholder(targetAppIdFromCli)) {
     const selected = accounts.find((a) => a && a.selected && a.appId);
-    if (!selected) {
-      // 无 selected：回退平台默认号
-      return undefined;
-    }
+    if (!selected) return undefined;
     const sid = String(selected.appId).trim();
     if (isPlatformAppId(sid)) return undefined;
     return sid;
@@ -196,17 +188,41 @@ function resolvePushAppId(cfg, targetAppIdFromCli) {
   const tid = String(targetAppIdFromCli).trim();
   if (isPlatformAppId(tid)) return undefined;
 
-  const found = accounts.some(
+  const byAppId = accounts.find(
     (a) =>
       a &&
       a.appId &&
       String(a.appId).toLowerCase() === tid.toLowerCase()
   );
-  if (!found) {
-    console.error(
-      '提示: 传入的 AppID 未出现在 config.accounts 中，仍将按接口规则推送。'
+  if (byAppId) return String(byAppId.appId).trim();
+
+  const q = tid.toLowerCase().replace(/\s+/g, '');
+  const nameHits = accounts.filter((a) => {
+    if (!a || !a.appId) return false;
+    const n = String(a.name || '')
+      .toLowerCase()
+      .replace(/\s+/g, '');
+    if (!n) return false;
+    if (n === q) return true;
+    if (q.length >= 2 && n.includes(q)) return true;
+    if (n.length >= 4 && q.includes(n)) return true;
+    return false;
+  });
+  if (nameHits.length === 1) return String(nameHits[0].appId).trim();
+  if (nameHits.length > 1) {
+    throw new Error(
+      '公众号名称不唯一: ' +
+        tid +
+        ' → ' +
+        nameHits
+          .map((a) => (a.name || '') + '(' + a.appId + ')')
+          .join(', ')
     );
   }
+
+  console.error(
+    '提示: 未在 config.accounts 中匹配到该公众号，仍按传入值推送: ' + tid
+  );
   return tid;
 }
 
@@ -214,7 +230,7 @@ async function main() {
   const args = process.argv.slice(2);
   if (args.length < 2) {
     throw new Error(
-      '用法:\n  node push-to-wechat-mp.js <targetAppId> html <文件名.html> [sendMode]\n  node push-to-wechat-mp.js <targetAppId> img \'<JSON>\' <title> <content> [sendMode]\n  targetAppId：- / default / 空 = config 中 selected:true；wx… = 指定公众号；selected 为平台号时走平台默认。'
+      '用法:\n  node push-to-wechat-mp.js <公众号|-|名称|AppID> html <HTML路径> [sendMode]\n  node push-to-wechat-mp.js <公众号|-|名称|AppID> img \'<JSON>\' <title> <content> [sendMode]'
     );
   }
 
@@ -256,37 +272,46 @@ async function main() {
   } else if (mode === 'html') {
     if (args.length < 3) {
       throw new Error(
-        'HTML 模式须传入文件名。示例: node push-to-wechat-mp.js targetAppId html 你的文件.html draft'
+        'HTML 模式须传入文件路径。示例: node push-to-wechat-mp.js - html ../works/demo/main.html draft'
       );
     }
-    const fileName = path.basename((args[2] || '').trim());
-    if (!fileName) {
-      throw new Error(
-        '请传入 HTML 文件名（与脚本同目录）。例如: node push-to-wechat-mp.js targetAppId html 你的文件.html draft'
-      );
+    const rawPath = String(args[2] || '').trim();
+    if (!rawPath) {
+      throw new Error('请传入 HTML 文件路径（作品目录内）');
     }
     sendMode = (args[3] && args[3].trim()) || 'draft';
 
-    const htmlPath = path.join(DIR, fileName);
-    if (!fs.existsSync(htmlPath)) {
-      throw new Error('同目录下找不到: ' + fileName + '（请把 HTML 放在脚本所在目录）');
+    const candidates = [
+      path.isAbsolute(rawPath) ? rawPath : '',
+      path.isAbsolute(rawPath) ? '' : path.join(DIR, rawPath),
+      path.isAbsolute(rawPath) ? '' : path.resolve(process.cwd(), rawPath),
+    ].filter(Boolean);
+    let htmlPath = '';
+    for (const p of candidates) {
+      if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+        htmlPath = p;
+        break;
+      }
+    }
+    if (!htmlPath) {
+      throw new Error('找不到 HTML: ' + rawPath);
     }
     content = fs.readFileSync(htmlPath, 'utf8');
     if (!content.trim()) throw new Error('文件为空: ' + htmlPath);
-    title = titleFromHtml(content); 
+    title = titleFromHtml(content);
 
-    const thumbImagePath = path.join(DIR, fileName.replace('.html', '_cover.html'));
+    const base = path.basename(htmlPath, path.extname(htmlPath));
+    const thumbImagePath = path.join(path.dirname(htmlPath), base + '_cover.html');
     if (!fs.existsSync(thumbImagePath)) {
-      console.warn('同目录下找不到: ' + thumbImagePath + '（本次跳过cover.html封面图片生成，将使用其它方式生成封面图片）');
-    }
-    else
-    {
+      console.warn(
+        '作品目录下找不到: ' + thumbImagePath + '（本次跳过封面）'
+      );
+    } else {
       thumbImageContent = fs.readFileSync(thumbImagePath, 'utf8');
     }
-
   } else {
     throw new Error(
-      '第二参须为 html 或 img。示例:\n  node push-to-wechat-mp.js targetAppId html 你的文件.html draft'
+      '第二参须为 html 或 img。示例:\n  node push-to-wechat-mp.js - html ../works/demo/main.html draft'
     );
   }
 
