@@ -33,8 +33,9 @@ npx skills add lihengdao/aigc-web-push
 works/20261117-demo/
   main.html
   main_cover.html          # 可选
+  cover.png                # 可选封面图（有则优先）
   # 或视频：
-  remotion/  audio/  out/aigc-video.mp4  cover.html
+  remotion/  audio/  out/aigc-video.mp4  cover.html / cover.png
 ```
 
 - 文章 / 贴图：按 `design.md`

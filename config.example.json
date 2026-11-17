@@ -51,6 +51,8 @@
     "categoryId": "article",
     "title": "文章标题",
     "content": "<html>…</html>",
+    "coverHtml": "<html>…封面…</html>",
+    "coverImageUrl": "https://…/cover.png",
     "publishMode": "draft",
     "targetScope": "all"
   },

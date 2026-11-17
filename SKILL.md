@@ -46,6 +46,7 @@ works/<YYYYMMDD>-<短主题>/
 works/20261117-gugong-ye-you/
   main.html
   main_cover.html      # 可选；与主 HTML 同目录，主文件名 + _cover.html
+  cover.png            # 可选封面图（有则优先于 HTML）
 ```
 
 **视频：**
@@ -55,7 +56,8 @@ works/20261117-gugong-ye-you/
   remotion/            # Remotion 工程
   audio/               # TTS、音乐、音效
   out/aigc-video.mp4   # 成片
-  cover.html           # 可选封面；也可放在 out/ 下
+  cover.html           # 可选封面 HTML；也可放在 out/ 下
+  cover.png            # 可选封面图（有则优先；作品目录或 out/）
 ```
 
 ### 规则
@@ -145,7 +147,7 @@ EOF
 2. 在作品目录生成 `main.html`（文件名可自定）：
    - **文章**：默认宽度 677px
    - **贴图**：默认宽度 375px，固定分页比例（默认 3:4）；同作品内所有 `.pagination` 高度一致。推公众号时后台会把 HTML 转成图片。
-3. 无内嵌图片时，按 `design.md`「封面 HTML」在**同一作品目录**生成 `main_cover.html`（主文件名 + `_cover.html`）。
+3. 无内嵌图片时，按 `design.md`「封面 HTML」在**同一作品目录**生成 `main_cover.html`（主文件名 + `_cover.html`）；若已有封面图，文件名固定为 `cover.png`（有则优先）。
 
 贴图版式取向见 `design.md`「版式取向」。
 
@@ -160,7 +162,7 @@ EOF
    - 加载 `remotion-best-practices`；写场景加载 `remotion-markup`；查 API 用 `remotion-docs` 或官网文档。
    - 无法安装时告知用户并查官方文档，禁止凭记忆硬写。
 3. 流程：旁白文案 → 锁定 TTS → 字词级对齐 → 字幕 → 分镜 → Remotion → 渲染 → 验收。
-4. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` / `video_cover.html`（作品目录或 `out/` 下）。
+4. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` / `video_cover.html`，或封面图 `cover.png`（作品目录或 `out/`；有图优先）。
 
 ---
 
@@ -223,7 +225,7 @@ node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" dr
 node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft account "抖音主号"
 ```
 
-封面：与主 HTML 同目录的 `*_cover.html`，或视频作品目录 / `out/` 下的 `cover.html`、`video_cover.html`，推送时自动附带。
+封面：推送时自动附带。封面图固定为 `cover.png`（有则优先）；否则文章用同目录 `*_cover.html`，视频用 `cover.html` / `video_cover.html`。
 
 ### 说明
 

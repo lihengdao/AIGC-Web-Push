@@ -180,7 +180,21 @@ function readFirstExistingFile(candidates) {
   return '';
 }
 
-/** 文章封面：仅在 HTML 所在作品目录查找 */
+function firstExistingPath(candidates) {
+  for (const p of candidates) {
+    if (p && fs.existsSync(p) && fs.statSync(p).isFile()) return p;
+  }
+  return '';
+}
+
+/** 封面图固定名：cover.png（与云电脑一致） */
+function resolveCoverPng(dirs) {
+  return firstExistingPath(
+    (dirs || []).filter(Boolean).map((dir) => path.join(dir, 'cover.png'))
+  );
+}
+
+/** 文章封面 HTML：仅在 HTML 所在作品目录查找 */
 function resolveCoverHtmlForArticle(htmlPath) {
   const dir = path.dirname(htmlPath);
   const base = path.basename(htmlPath, path.extname(htmlPath));
@@ -190,7 +204,7 @@ function resolveCoverHtmlForArticle(htmlPath) {
   ]);
 }
 
-/** 视频封面：成片目录及其上一级作品目录 */
+/** 视频封面 HTML：成片目录及其上一级作品目录 */
 function resolveCoverHtmlForVideo(mediaPath) {
   if (!mediaPath) return '';
   const dir = path.dirname(mediaPath);
@@ -201,6 +215,41 @@ function resolveCoverHtmlForVideo(mediaPath) {
     path.join(parent, 'cover.html'),
     path.join(parent, 'video_cover.html'),
   ]);
+}
+
+/** 有 cover.png 优先，否则 HTML */
+function resolveCoverAssets({ kind, anchorPath }) {
+  if (kind === 'video') {
+    const dir = anchorPath ? path.dirname(anchorPath) : '';
+    const parent = dir ? path.dirname(dir) : '';
+    const coverImagePath = resolveCoverPng([dir, parent]);
+    return {
+      coverImagePath,
+      coverHtml: coverImagePath ? '' : resolveCoverHtmlForVideo(anchorPath),
+    };
+  }
+  const coverImagePath = resolveCoverPng([path.dirname(anchorPath)]);
+  return {
+    coverImagePath,
+    coverHtml: coverImagePath ? '' : resolveCoverHtmlForArticle(anchorPath),
+  };
+}
+
+async function buildCoverFields(apiBase, openId, skillKey, assets) {
+  const coverImagePath = String(assets?.coverImagePath || '').trim();
+  const coverHtml = String(assets?.coverHtml || '').trim();
+  if (coverImagePath) {
+    return {
+      coverImageUrl: await uploadLocalFile(
+        apiBase,
+        openId,
+        skillKey,
+        coverImagePath
+      ),
+    };
+  }
+  if (coverHtml) return { coverHtml };
+  return {};
 }
 
 function resolveInputFile(raw) {
@@ -667,18 +716,21 @@ async function main() {
       categoryId
     );
     activeInstanceIds = target.serverInstanceIds || activeInstanceIds;
-    const coverHtml = resolveCoverHtmlForArticle(htmlPath);
-    if (!coverHtml) {
-      const expected = path.join(
-        path.dirname(htmlPath),
-        path.basename(htmlPath, path.extname(htmlPath)) + '_cover.html'
-      );
+    const coverAssets = resolveCoverAssets({ kind: 'article', anchorPath: htmlPath });
+    if (!coverAssets.coverImagePath && !coverAssets.coverHtml) {
+      const base = path.basename(htmlPath, path.extname(htmlPath));
       console.warn(
-        '作品目录下找不到: ' +
-          expected +
-          '（本次跳过封面 HTML）'
+        '作品目录下找不到封面（cover.png / ' +
+          base +
+          '_cover.html / cover.html）（本次跳过封面）'
       );
     }
+    const coverFields = await buildCoverFields(
+      apiBase,
+      openId,
+      skillKey,
+      coverAssets
+    );
     body = attachTargetFields(
       {
         action: 'sendToCloud',
@@ -689,7 +741,7 @@ async function main() {
         title: titleFromHtml(content),
         content,
         publishMode: tail.publishMode,
-        ...(coverHtml ? { coverHtml } : {}),
+        ...coverFields,
       },
       target
     );
@@ -747,13 +799,19 @@ async function main() {
     );
     activeInstanceIds = target.serverInstanceIds || activeInstanceIds;
     const firstLocal = sources.map((s) => resolveLocalPath(s)).find(Boolean) || '';
-    const coverHtml = resolveCoverHtmlForVideo(firstLocal);
-    if (!coverHtml) {
+    const coverAssets = resolveCoverAssets({ kind: 'video', anchorPath: firstLocal });
+    if (!coverAssets.coverImagePath && !coverAssets.coverHtml) {
       console.warn(
-        '作品目录下找不到 cover.html / video_cover.html（本次跳过封面）'
+        '作品目录下找不到封面（cover.png / cover.html / video_cover.html）（本次跳过封面）'
       );
     }
     const urls = await resolveMediaUrls(apiBase, openId, skillKey, sources);
+    const coverFields = await buildCoverFields(
+      apiBase,
+      openId,
+      skillKey,
+      coverAssets
+    );
     body = attachTargetFields(
       {
         action: 'sendToCloud',
@@ -764,7 +822,7 @@ async function main() {
         title,
         imgUrls: urls,
         publishMode: tail.publishMode,
-        ...(coverHtml ? { coverHtml } : {}),
+        ...coverFields,
       },
       target
     );
@@ -781,6 +839,7 @@ async function main() {
     receiverAccountIds: body.receiverAccountIds || [],
     receiverBrowserProfileIds: body.receiverBrowserProfileIds || [],
     hasCoverHtml: Boolean(body.coverHtml),
+    hasCoverImageUrl: Boolean(body.coverImageUrl),
     imgUrls: body.imgUrls || undefined,
   });
 
