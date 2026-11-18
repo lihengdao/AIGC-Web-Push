@@ -42,7 +42,6 @@ function readText(filePath) {
 }
 
 function readLocalVersion(dir) {
-  // Prefer package.json（各 skill 商店都收 .json）；兼容旧包里的 VERSION
   try {
     const pkg = JSON.parse(
       fs.readFileSync(path.join(dir, 'package.json'), 'utf8')
@@ -52,8 +51,7 @@ function readLocalVersion(dir) {
   } catch {
     /* fall through */
   }
-  const legacy = readText(path.join(dir, 'VERSION'));
-  return legacy || '0.0.0';
+  return readText(path.join(dir, 'VERSION')) || '0.0.0';
 }
 
 function writeLocalVersion(dir, version) {
@@ -235,13 +233,11 @@ async function downloadVersionFiles(dir, version) {
     written += 1;
   }
 
-  // 升级后把 semver 写回 package.json，避免反复全量拉取
   const current = readLocalVersion(dir);
   if (!current || current === '0.0.0' || cmpSemver(current, version) < 0) {
     writeLocalVersion(dir, version);
     written += 1;
   }
-  // 清掉旧无扩展名 VERSION（部分商店如腾讯 SkillHub 拒收）
   try {
     fs.unlinkSync(path.join(dir, 'VERSION'));
   } catch {

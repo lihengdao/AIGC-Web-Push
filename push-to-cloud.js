@@ -802,7 +802,7 @@ async function main() {
     const coverAssets = resolveCoverAssets({ kind: 'video', anchorPath: firstLocal });
     if (!coverAssets.coverImagePath && !coverAssets.coverHtml) {
       console.warn(
-        '作品目录下找不到封面（cover.png / cover.html / video_cover.html）（本次跳过封面）'
+        '作品目录下找不到封面（cover.png / cover.html）（本次跳过封面）'
       );
     }
     const urls = await resolveMediaUrls(apiBase, openId, skillKey, sources);

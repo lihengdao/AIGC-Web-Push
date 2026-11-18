@@ -2,7 +2,7 @@
 name: aigc-web-push · AI内容生成与全网推送
 slug: aigc-web-push
 displayName: aigc-web-push · AI内容生成与全网推送
-version: 3.5.0
+version: 3.5.1
 summary: AI 生成文章/图文/视频，并推送到微信公众号或云电脑全网发布
 license: MIT
 description: 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
@@ -10,7 +10,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.5.0**
+**版本 3.5.1**
 
 ## 文件路径与作用
 
@@ -83,7 +83,10 @@ works/20261117-gugong-ye-you/
 | **配置向导地址** | [https://design.pcloud.ac.cn/aigc-web-push.html](https://design.pcloud.ac.cn/aigc-web-push.html) |
 | **流程** | AI 发向导给**当前操作用户** → 已在 design 登录则直接继续，否则微信扫码 → 选默认公众号 / 默认云电脑 → 用户复制发给 **自己的** AI |
 
-AI 检查 **aigc-web-push 目录** 下是否存在 `config.json`。如果不存在，则无法使用本技能，AI 需要发送配置向导地址给用户完成配置。
+AI 检查 **aigc-web-push 目录** 下是否存在含有效 `openId` + `skillKey` 的 `config.json`。
+
+- **写文章 / 贴图 / 做视频（含旁白、画面、成片）不要求登录**，无配置也可继续。
+- **缺配置时不可用：** 推送、平台音乐搜索。需要时再发上方配置向导；用户也可选择不登录，则跳过平台配乐（或改用用户自备音乐），照常成片。
 
 **说明：**
 
@@ -129,7 +132,7 @@ EOF
 - `accounts`：有公众号才写入；`selected: true` 为默认（至多一项）。
 - `instances`：有云电脑才写入；`selected: true` 为默认（至多一项）。
 - `defaultTargetScope`：向导固定为 `all`；推送时可用 CLI 覆盖为 `environment` / `account`。
-- `skillKey`：向导签发；推送与 `remotion-video.md` 中音乐搜索等需鉴权接口必带。
+- `skillKey`：向导签发；推送与音乐搜索必带。
 - `autoUpdate`：可选；`false` 关闭推送前自动升级。
 
 ---
@@ -166,8 +169,9 @@ EOF
    - 尚未安装 Remotion：`npx skills add remotion-dev/skills`
    - 加载 `remotion-best-practices`；写场景加载 `remotion-markup`；查 API 用 `remotion-docs` 或官网文档。
    - 无法安装时告知用户并查官方文档，禁止凭记忆硬写。
-3. 流程：旁白文案 → 锁定 TTS → 字词级对齐 → 字幕 → 分镜 → Remotion → 渲染 → 验收。
-4. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` / `video_cover.html`，或封面图 `cover.png`（作品目录或 `out/`；有图优先）。
+3. 背景音乐可选：有配置则按 `remotion-video.md` §7.1 搜平台音乐；无配置则提示可走向导配乐，用户也可不登录——无 BGM 或用户自备音乐继续成片，**不得因未登录而中断视频制作**。
+4. 流程：旁白文案 → 锁定 TTS → 字词级对齐 → 字幕 → 分镜 → Remotion → 渲染 → 验收。
+5. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` 或 `cover.png`（作品目录或 `out/`；有图优先）。
 
 ---
 
@@ -230,15 +234,14 @@ node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" dr
 node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft account "抖音主号"
 ```
 
-封面：推送时自动附带。封面图固定为 `cover.png`（有则优先）；否则文章用同目录 `*_cover.html`，视频用 `cover.html` / `video_cover.html`。
+封面：推送时自动附带。封面图固定为 `cover.png`（有则优先）；否则文章用同目录 `*_cover.html`，视频用 `cover.html`。
 
 ### 说明
 
-- 公众号未指定时用 `-` / `default` → `accounts` 中 `selected: true`；也可传名称或 AppID。
-- 云电脑未指定时用 `-` → `instances` 中 `selected: true`；也可传机名或 id。
-- 云电脑指定环境/账号时，末参的 id 与名称一律经 `resolveCloudPublishTarget` 解析，歧义则失败并打印候选。
-- API：`apiBase`（缺省 `https://api.pcloud.ac.cn/openAccessService`）。公众号 `sendToWechat`；云电脑 `sendToCloud`；列目标 `listCloudPublishTargets`；按名解析 `resolveCloudPublishTarget`；上传 `prepareMediaUpload`。
-- **云电脑入队即完成**：勿轮询站点结果、勿因「还没发出」而重推。
+- 公众号 / 云电脑未指定时用 `-` → 配置里 `selected: true` 项；也可传名称或 id。
+- 云电脑指定环境/账号时按名称解析，歧义则失败并打印候选。
+- API 基址：`apiBase`（缺省 `https://api.pcloud.ac.cn/openAccessService`）。
+- **云电脑入队即完成**：勿轮询、勿因「还没发出」重推。
 - **公众号超时**：可视为已受理，勿狂推；请用户看服务通知或草稿箱。
 
 ## 其它功能

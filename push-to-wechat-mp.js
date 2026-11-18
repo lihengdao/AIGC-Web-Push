@@ -60,8 +60,7 @@ function parseImgUrlsArg(arg) {
     originalError = e;
   }
 
-  // 如果直接解析失败，尝试兼容处理
-  // 兼容 PowerShell 单引号传参导致外层方括号丢失的情况
+  // PowerShell 单引号传参时常见：方括号/引号被剥掉
   if (!trimmed.startsWith('[')) {
     trimmed = '[' + trimmed;
   }
@@ -69,12 +68,8 @@ function parseImgUrlsArg(arg) {
     trimmed = trimmed + ']';
   }
 
-  // 兼容 PowerShell 单引号传参导致内部双引号丢失的情况
   if (!trimmed.includes('"')) {
-    // 移除外层方括号，获取内容
     let content = trimmed.slice(1, -1);
-
-    // 更稳健的方法：按逗号分割，但智能合并包含URL的片段
     const parts = content.split(',');
     const urls = [];
     let currentUrl = '';
@@ -82,7 +77,6 @@ function parseImgUrlsArg(arg) {
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i].trim();
       if (part.startsWith('http://') || part.startsWith('https://')) {
-        // 如果currentUrl不为空，说明这是一个新的URL开始
         if (currentUrl) {
           urls.push(currentUrl.trim());
         }

@@ -32,7 +32,6 @@ if (channel !== 'wechat' && channel !== 'cloud') {
 }
 
 async function main() {
-  // 临时：去掉「升级后 spawn 自身」以规避商店启发式误报；升级后直接跑渠道脚本（子进程会读盘上的新文件）。
   await ensureUpToDate({ dir });
 
   const script =
