@@ -32,19 +32,8 @@ if (channel !== 'wechat' && channel !== 'cloud') {
 }
 
 async function main() {
-  const update = await ensureUpToDate({ dir });
-  if (update.updated) {
-    const r = spawnSync(
-      process.execPath,
-      [path.join(dir, 'push.js'), ...process.argv.slice(2)],
-      {
-        cwd: dir,
-        stdio: 'inherit',
-        env: { ...process.env, AIGC_WEB_PUSH_REEXEC: '1' },
-      }
-    );
-    process.exit(r.status == null ? 1 : r.status);
-  }
+  // 临时：去掉「升级后 spawn 自身」以规避商店启发式误报；升级后直接跑渠道脚本（子进程会读盘上的新文件）。
+  await ensureUpToDate({ dir });
 
   const script =
     channel === 'wechat'

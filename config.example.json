@@ -4,7 +4,7 @@
     "apiBase": "缺省 https://api.pcloud.ac.cn/openAccessService",
     "openId": "当前操作用户扫码得到的微信 openId；禁止编造；禁止共用他人 config",
     "skillKey": "向导签发、与 openId 绑定；推送必带。重新扫码会轮换，旧 key 立即失效",
-    "autoUpdate": "可选；false 关闭 push.js 推送前自动对齐 ClawHub（默认开启）",
+    "autoUpdate": "可选；false 关闭 push.js 推送前自动升级（默认开启）",
     "accounts": "可用公众号（本人 + 企业授权 + 管理员可见）；selected:true 为默认；推送可用 name 或 appId",
     "instances": "可用云电脑（本人 + 企业授权 + 管理员可见）；selected:true 为默认；推送可用 name 或 instanceId",
     "defaultTargetScope": "向导固定 all；CLI 可临时覆盖为 environment | account"

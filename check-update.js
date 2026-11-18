@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 推送前对齐 ClawHub 最新版（保留 config.json）。
+ * 推送前对齐远端最新版（保留 config.json 等本地文件）。
  * 失败开放：网络错误只告警，不阻断推送。
  */
 
@@ -20,6 +20,14 @@ const PROTECTED_NAMES = new Set([
   '.git',
   '.gitignore',
 ]);
+
+function isProtectedRel(rel) {
+  const base = path.basename(rel);
+  if (PROTECTED_NAMES.has(base) || PROTECTED_NAMES.has(rel)) return true;
+  // 本地私有文件：*.local.*（不入库、不随升级覆盖）
+  if (/\.local(\.|$)/i.test(base)) return true;
+  return false;
+}
 
 function skillDir() {
   return __dirname;
@@ -201,8 +209,7 @@ function skillApi(pathname, query) {
 function safeRelPath(p) {
   const rel = String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
   if (!rel || rel.includes('..') || path.isAbsolute(rel)) return null;
-  const base = path.basename(rel);
-  if (PROTECTED_NAMES.has(base) || PROTECTED_NAMES.has(rel)) return null;
+  if (isProtectedRel(rel)) return null;
   return rel;
 }
 

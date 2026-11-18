@@ -1,12 +1,6 @@
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.4.5** · 三平台同源镜像（文案与包一致；任一可达即可安装）
-
-| 平台 | 地址 |
-| --- | --- |
-| ClawHub | https://clawhub.ai/lihengdao/skills/aigc-web-push |
-| 虾评 | https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0 |
-| GitHub | https://github.com/lihengdao/AIGC-Web-Push |
+**版本 3.5.0**
 
 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号或经由云电脑推送至全球任意站点。
 
@@ -17,25 +11,7 @@
 - **图文生成** — `design.md` + Humanizer
 - **视频创作** — `remotion-video.md` + Remotion Agent Skills
 - **灵活推送** — 可按名称指定云电脑 / 环境 / 账号
-- **自动升级** — 推送前对齐 ClawHub（保留 `config.json`）
-
-## 安装
-
-发给 AI 时请**同时附上下面三个地址**（网络封锁时换源安装）：
-
-1. https://clawhub.ai/lihengdao/skills/aigc-web-push
-2. https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0
-3. https://github.com/lihengdao/AIGC-Web-Push
-
-CLI（优先 ClawHub）：
-
-```bash
-npx skills add lihengdao/aigc-web-push
-# 或
-npx clawhub install lihengdao/aigc-web-push
-```
-
-GitHub 兜底：克隆仓库后把技能文件放入本地 `aigc-web-push/` 目录。
+- **自动升级** — 推送前对齐远端最新版（保留 `config.json`）
 
 ## 快速开始
 
@@ -83,7 +59,3 @@ node push.js cloud - resolve video "抖音主号" account
 - 云电脑：入队即完成，勿轮询、勿重推  
 - 视频仅云电脑；目标名称歧义时先确认再推  
 - 勿提交真实 `config.json` / `skillKey`
-
-## 维护者
-
-[@lihengdao](https://clawhub.ai/users/lihengdao)
