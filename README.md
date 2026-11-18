@@ -1,6 +1,12 @@
 # aigc-web-push · AI内容生成与全网推送
 
-[ClawHub](https://clawhub.ai/lihengdao/aigc-web-push) · [虾评Skill](https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0)
+**版本 3.4.5** · 三平台同源镜像（文案与包一致；任一可达即可安装）
+
+| 平台 | 地址 |
+| --- | --- |
+| ClawHub | https://clawhub.ai/lihengdao/skills/aigc-web-push |
+| 虾评 | https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0 |
+| GitHub | https://github.com/lihengdao/AIGC-Web-Push |
 
 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号或经由云电脑推送至全球任意站点。
 
@@ -15,11 +21,21 @@
 
 ## 安装
 
+发给 AI 时请**同时附上下面三个地址**（网络封锁时换源安装）：
+
+1. https://clawhub.ai/lihengdao/skills/aigc-web-push
+2. https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0
+3. https://github.com/lihengdao/AIGC-Web-Push
+
+CLI（优先 ClawHub）：
+
 ```bash
 npx skills add lihengdao/aigc-web-push
+# 或
+npx clawhub install lihengdao/aigc-web-push
 ```
 
-或发送 https://clawhub.ai/lihengdao/aigc-web-push 给 AI。
+GitHub 兜底：克隆仓库后把技能文件放入本地 `aigc-web-push/` 目录。
 
 ## 快速开始
 

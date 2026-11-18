@@ -5,6 +5,12 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
+**版本 3.4.5** · 三平台同源。发给 / 安装本技能时，请同时提供下列地址（任一可达即可）：
+
+1. ClawHub：https://clawhub.ai/lihengdao/skills/aigc-web-push
+2. 虾评：https://xiaping.coze.com/skill/015db5c8-8dc6-4c44-b16c-b865ea3c06f0
+3. GitHub：https://github.com/lihengdao/AIGC-Web-Push
+
 ## 文件路径与作用
 
 | 文件 | 位置 | 作用 |
@@ -129,7 +135,7 @@ EOF
 
 ## 自动升级
 
-`push.js` 推送前对照 [ClawHub](https://clawhub.ai/lihengdao/aigc-web-push) 最新版；落后则升级技能文件并继续推送（**保留 `config.json`**）。同目录 24 小时检查一次。网络失败不阻断推送。
+`push.js` 推送前对照 [ClawHub](https://clawhub.ai/lihengdao/skills/aigc-web-push) 最新版；落后则升级技能文件并继续推送（**保留 `config.json`**）。同目录 24 小时检查一次。网络失败不阻断推送。镜像源：虾评 / GitHub（见文首三地址）。
 
 关闭：`config.json` 设 `"autoUpdate": false`，或环境变量 `AIGC_WEB_PUSH_NO_UPDATE=1`。
 
