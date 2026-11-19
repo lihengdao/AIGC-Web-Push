@@ -2,7 +2,7 @@
 name: aigc-web-push · AI内容生成与全网推送
 slug: aigc-web-push
 displayName: aigc-web-push · AI内容生成与全网推送
-version: 3.5.1
+version: 3.6.0
 summary: AI 生成文章/图文/视频，并推送到微信公众号或云电脑全网发布
 license: MIT
 description: 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
@@ -10,7 +10,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.5.1**
+**版本 3.6.0**
 
 ## 文件路径与作用
 
@@ -172,6 +172,7 @@ EOF
 3. 背景音乐可选：有配置则按 `remotion-video.md` §7.1 搜平台音乐；无配置则提示可走向导配乐，用户也可不登录——无 BGM 或用户自备音乐继续成片，**不得因未登录而中断视频制作**。
 4. 流程：旁白文案 → 锁定 TTS → 字词级对齐 → 字幕 → 分镜 → Remotion → 渲染 → 验收。
 5. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` 或 `cover.png`（作品目录或 `out/`；有图优先）。
+6. 推送时须带 **标题** 与 **描述**（`description`，分享摘要）；封面自动附带。
 
 ---
 
@@ -219,22 +220,22 @@ cd aigc-web-push
 node push.js wechat - html ../works/20261117-demo/main.html
 node push.js wechat "我的订阅号" html ../works/20261117-demo/main.html
 
-# 公众号 · 图片 URL
-node push.js wechat - img '["https://cdn.example.com/1.png"]' "标题" "正文"
+# 公众号 · 图片 URL（第 4 参为描述 / 图说）
+node push.js wechat - img '["https://cdn.example.com/1.png"]' "标题" "描述"
 
-# 云电脑 · HTML
+# 云电脑 · HTML（标题←title，描述←meta description）
 node push.js cloud - html ../works/20261117-demo/main.html article draft
 node push.js cloud - html ../works/20261117-demo/main.html article draft account "官网账号"
 
-# 云电脑 · 本地图
-node push.js cloud - img ../works/20261117-demo/poster.png "标题" draft
+# 云电脑 · 本地图（可选描述）
+node push.js cloud - img ../works/20261117-demo/poster.png "标题" "描述" draft
 
-# 云电脑 · 视频
-node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft
-node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft account "抖音主号"
+# 云电脑 · 视频（标题 + 描述 + 可选封面）
+node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" "描述" draft
+node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" "描述" draft account "抖音主号"
 ```
 
-封面：推送时自动附带。封面图固定为 `cover.png`（有则优先）；否则文章用同目录 `*_cover.html`，视频用 `cover.html`。
+字段对齐 auto-publish / design 前端：`title`、`description`、封面（`cover.png` 优先，否则文章 `*_cover.html` / 视频 `cover.html`）。
 
 ### 说明
 

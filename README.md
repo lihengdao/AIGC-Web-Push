@@ -1,6 +1,6 @@
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.5.1**
+**版本 3.6.0**
 
 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号或经由云电脑推送至全球任意站点。
 
@@ -42,7 +42,7 @@ cd aigc-web-push
 node push.js wechat - html ../works/20261117-demo/main.html
 node push.js wechat "我的订阅号" html ../works/20261117-demo/main.html
 node push.js cloud - html ../works/20261117-demo/main.html article draft
-node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" draft account "抖音主号"
+node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" "描述" draft account "抖音主号"
 node push.js cloud - list-targets video
 node push.js cloud - resolve video "抖音主号" account
 ```
