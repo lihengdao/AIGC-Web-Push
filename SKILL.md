@@ -2,7 +2,7 @@
 name: aigc-web-push · AI内容生成与全网推送
 slug: aigc-web-push
 displayName: aigc-web-push · AI内容生成与全网推送
-version: 3.6.0
+version: 3.6.1
 summary: AI 生成文章/图文/视频，并推送到微信公众号或云电脑全网发布
 license: MIT
 description: 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
@@ -10,7 +10,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.6.0**
+**版本 3.6.1**
 
 ## 文件路径与作用
 
@@ -23,7 +23,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 | **config.json** | 同上 | 配置向导生成后的真实配置 |
 | **config.example.json** | 同上 | 字段说明 + 示例 |
 | **package.json** | 同上 | 固定 CommonJS（`private`，不发 npm）；`version` 为技能版本 |
-| **check-update.js** | 同上 | 推送前核对 / 自升级（由 `push.js` 调用） |
+| **check-update.js** | 同上 | 推送前核对版本；落后只提示重装（由 `push.js` 调用） |
 | **push.js** | 同上 | 统一推送入口（公众号 / 云电脑） |
 | **push-to-wechat-mp.js** | 同上 | 公众号推送实现 |
 | **push-to-cloud.js** | 同上 | 云电脑推送实现（本地媒体上传、按名解析目标） |
@@ -133,15 +133,17 @@ EOF
 - `instances`：有云电脑才写入；`selected: true` 为默认（至多一项）。
 - `defaultTargetScope`：向导固定为 `all`；推送时可用 CLI 覆盖为 `environment` / `account`。
 - `skillKey`：向导签发；推送与音乐搜索必带。
-- `autoUpdate`：可选；`false` 关闭推送前自动升级。
+- `autoUpdate`：可选；`false` 关闭推送前版本检查。
 
 ---
 
-## 自动升级
+## 版本检查
 
-`push.js` 推送前对照远端最新版；落后则升级技能文件并继续推送（**保留 `config.json`**）。同目录 24 小时检查一次。网络失败不阻断推送。
+`push.js` 推送前对照远端最新版；若本地落后，**只打印重装提示并继续推送**，不会下载或覆盖技能文件。同目录 24 小时检查一次。网络失败不阻断推送。
 
 关闭：`config.json` 设 `"autoUpdate": false`，或环境变量 `AIGC_WEB_PUSH_NO_UPDATE=1`。
+
+重装示例（保留本目录 `config.json`）：`npx skills add lihengdao/AIGC-Web-Push -g -y`，或从 GitHub / ClawHub 同步。
 
 ---
 

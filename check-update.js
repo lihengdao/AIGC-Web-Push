@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 推送前对齐远端最新版（保留 config.json 等本地文件）。
+ * 推送前对照远端最新版；若落后只提示重装，不下载、不覆盖本地技能文件。
  * 失败开放：网络错误只告警，不阻断推送。
  */
 
@@ -14,20 +14,12 @@ const REGISTRY = 'https://clawhub.ai';
 const CHECK_TTL_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 12_000;
 
-const PROTECTED_NAMES = new Set([
-  'config.json',
-  '.update-check',
-  '.git',
-  '.gitignore',
-]);
-
-function isProtectedRel(rel) {
-  const base = path.basename(rel);
-  if (PROTECTED_NAMES.has(base) || PROTECTED_NAMES.has(rel)) return true;
-  // 本地私有文件：*.local.*（不入库、不随升级覆盖）
-  if (/\.local(\.|$)/i.test(base)) return true;
-  return false;
-}
+const REINSTALL_HINT = [
+  '请用安装渠道重装本技能（保留 config.json），例如：',
+  '  npx skills add lihengdao/AIGC-Web-Push -g -y',
+  '  或从 https://github.com/lihengdao/AIGC-Web-Push 同步',
+  '  或 https://clawhub.ai/lihengdao/skills/aigc-web-push',
+].join('\n');
 
 function skillDir() {
   return __dirname;
@@ -52,34 +44,6 @@ function readLocalVersion(dir) {
     /* fall through */
   }
   return readText(path.join(dir, 'VERSION')) || '0.0.0';
-}
-
-function writeLocalVersion(dir, version) {
-  const pkgPath = path.join(dir, 'package.json');
-  try {
-    const pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
-    pkg.version = version;
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n', 'utf8');
-    return;
-  } catch {
-    /* create minimal pin if missing */
-  }
-  fs.writeFileSync(
-    pkgPath,
-    JSON.stringify(
-      {
-        name: 'aigc-web-push',
-        private: true,
-        version,
-        type: 'commonjs',
-        description:
-          'Local module type pin so push.js stays CommonJS under design/ (not an npm publish).',
-      },
-      null,
-      2
-    ) + '\n',
-    'utf8'
-  );
 }
 
 function parseSemver(v) {
@@ -111,15 +75,14 @@ function readAutoUpdateFlag(dir) {
     const cfg = JSON.parse(fs.readFileSync(path.join(dir, 'config.json'), 'utf8'));
     if (cfg && cfg.autoUpdate === false) return false;
   } catch {
-    /* no config or invalid — allow update */
+    /* no config or invalid — allow check */
   }
   return true;
 }
 
 function readCheckCache(dir) {
   try {
-    const j = JSON.parse(fs.readFileSync(path.join(dir, '.update-check'), 'utf8'));
-    return j;
+    return JSON.parse(fs.readFileSync(path.join(dir, '.update-check'), 'utf8'));
   } catch {
     return null;
   }
@@ -204,51 +167,8 @@ function skillApi(pathname, query) {
   return u.toString();
 }
 
-function safeRelPath(p) {
-  const rel = String(p || '').replace(/\\/g, '/').replace(/^\/+/, '');
-  if (!rel || rel.includes('..') || path.isAbsolute(rel)) return null;
-  if (isProtectedRel(rel)) return null;
-  return rel;
-}
-
-async function downloadVersionFiles(dir, version) {
-  const meta = await requestJson(
-    skillApi(`/versions/${encodeURIComponent(version)}`)
-  );
-  const files = (meta && meta.version && meta.version.files) || [];
-  if (!files.length) {
-    throw new Error(`版本 ${version} 无文件列表`);
-  }
-
-  let written = 0;
-  for (const f of files) {
-    const rel = safeRelPath(f.path);
-    if (!rel) continue;
-    const buf = await requestBuffer(
-      skillApi('/file', { path: rel, version })
-    );
-    const dest = path.join(dir, rel);
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.writeFileSync(dest, buf);
-    written += 1;
-  }
-
-  const current = readLocalVersion(dir);
-  if (!current || current === '0.0.0' || cmpSemver(current, version) < 0) {
-    writeLocalVersion(dir, version);
-    written += 1;
-  }
-  try {
-    fs.unlinkSync(path.join(dir, 'VERSION'));
-  } catch {
-    /* absent */
-  }
-
-  return written;
-}
-
 /**
- * @returns {Promise<{ updated: boolean, skipped?: boolean, from?: string, to?: string, reason?: string }>}
+ * @returns {Promise<{ updated: boolean, outdated?: boolean, skipped?: boolean, from?: string, to?: string, reason?: string }>}
  */
 async function ensureUpToDate(options = {}) {
   const dir = options.dir || skillDir();
@@ -293,21 +213,16 @@ async function ensureUpToDate(options = {}) {
     return { updated: false, skipped: true, reason: 'no-latest' };
   }
 
+  writeCheckCache(dir, { local, latest });
+
   if (cmpSemver(local, latest) >= 0) {
-    writeCheckCache(dir, { local, latest });
     return { updated: false, from: local, to: latest };
   }
 
-  console.log(`[aigc-web-push] 发现新版本 ${local} → ${latest}，正在升级…`);
-  try {
-    const n = await downloadVersionFiles(dir, latest);
-    writeCheckCache(dir, { local: latest, latest, filesWritten: n });
-    console.log(`[aigc-web-push] 已升级到 ${latest}（${n} 个文件）`);
-    return { updated: true, from: local, to: latest };
-  } catch (err) {
-    console.warn('[aigc-web-push] 升级失败，继续用当前版本:', err.message);
-    return { updated: false, skipped: true, reason: 'download', from: local, to: latest };
-  }
+  console.warn(
+    `[aigc-web-push] 发现新版本 ${local} → ${latest}，本技能不会自动覆盖本地文件。\n${REINSTALL_HINT}`
+  );
+  return { updated: false, outdated: true, from: local, to: latest };
 }
 
 module.exports = {
@@ -321,7 +236,7 @@ if (require.main === module) {
   ensureUpToDate({ force: process.argv.includes('--force') })
     .then((r) => {
       console.log(JSON.stringify(r));
-      process.exit(r.updated ? 0 : 0);
+      process.exit(0);
     })
     .catch((err) => {
       console.error(err);
