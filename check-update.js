@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * 推送前对照远端最新版；若落后只提示重装，不下载、不覆盖本地技能文件。
- * 失败开放：网络错误只告警，不阻断推送。
+ * 推送前对照远端最新版；若落后则提示 Agent 询问用户是否升级，不自动覆盖本地文件。
+ * 网络失败不阻断推送；确认落后时由 push.js 暂停，待用户决定后再继续。
  */
 
 const fs = require('fs');
@@ -13,13 +13,6 @@ const SKILL_SLUG = 'aigc-web-push';
 const REGISTRY = 'https://clawhub.ai';
 const CHECK_TTL_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 12_000;
-
-const REINSTALL_HINT = [
-  '请用安装渠道重装本技能（保留 config.json），例如：',
-  '  npx skills add lihengdao/AIGC-Web-Push -g -y',
-  '  或从 https://github.com/lihengdao/AIGC-Web-Push 同步',
-  '  或 https://clawhub.ai/lihengdao/skills/aigc-web-push',
-].join('\n');
 
 function skillDir() {
   return __dirname;
@@ -167,6 +160,13 @@ function skillApi(pathname, query) {
   return u.toString();
 }
 
+function printOutdatedHint(local, latest) {
+  // 给用户看的只问一句；同意/拒绝后的操作见 SKILL.md「版本检查」
+  console.warn(
+    `[aigc-web-push] 发现新版本 ${local} → ${latest}。请询问用户是否升级本技能。`
+  );
+}
+
 /**
  * @returns {Promise<{ updated: boolean, outdated?: boolean, skipped?: boolean, from?: string, to?: string, reason?: string }>}
  */
@@ -177,15 +177,14 @@ async function ensureUpToDate(options = {}) {
   if (process.env.AIGC_WEB_PUSH_NO_UPDATE === '1') {
     return { updated: false, skipped: true, reason: 'env' };
   }
-  if (process.env.AIGC_WEB_PUSH_REEXEC === '1') {
-    return { updated: false, skipped: true, reason: 'reexec' };
-  }
   if (isDesignSourceTree(dir)) {
     return { updated: false, skipped: true, reason: 'source' };
   }
   if (!readAutoUpdateFlag(dir)) {
     return { updated: false, skipped: true, reason: 'config' };
   }
+
+  const local = readLocalVersion(dir);
 
   if (!force) {
     const cache = readCheckCache(dir);
@@ -194,11 +193,14 @@ async function ensureUpToDate(options = {}) {
       typeof cache.checkedAt === 'number' &&
       Date.now() - cache.checkedAt < CHECK_TTL_MS
     ) {
+      if (cache.latest && cmpSemver(local, cache.latest) < 0) {
+        printOutdatedHint(local, cache.latest);
+        return { updated: false, outdated: true, from: local, to: cache.latest };
+      }
       return { updated: false, skipped: true, reason: 'cache' };
     }
   }
 
-  const local = readLocalVersion(dir);
   let latest;
   try {
     const meta = await requestJson(skillApi(''));
@@ -219,9 +221,7 @@ async function ensureUpToDate(options = {}) {
     return { updated: false, from: local, to: latest };
   }
 
-  console.warn(
-    `[aigc-web-push] 发现新版本 ${local} → ${latest}，本技能不会自动覆盖本地文件。\n${REINSTALL_HINT}`
-  );
+  printOutdatedHint(local, latest);
   return { updated: false, outdated: true, from: local, to: latest };
 }
 
@@ -236,7 +236,7 @@ if (require.main === module) {
   ensureUpToDate({ force: process.argv.includes('--force') })
     .then((r) => {
       console.log(JSON.stringify(r));
-      process.exit(0);
+      process.exit(r.outdated ? 2 : 0);
     })
     .catch((err) => {
       console.error(err);

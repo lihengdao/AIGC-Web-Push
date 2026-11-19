@@ -32,7 +32,11 @@ if (channel !== 'wechat' && channel !== 'cloud') {
 }
 
 async function main() {
-  await ensureUpToDate({ dir });
+  const check = await ensureUpToDate({ dir });
+  if (check && check.outdated) {
+    // 退出码 2：有新版本，等 Agent 问清用户是否升级后再推
+    process.exit(2);
+  }
 
   const script =
     channel === 'wechat'

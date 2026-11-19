@@ -4,7 +4,7 @@
     "apiBase": "缺省 https://api.pcloud.ac.cn/openAccessService",
     "openId": "扫码得到的微信 openId；禁止编造或共用他人 config",
     "skillKey": "向导签发，与 openId 绑定；推送与音乐搜索必带；重新扫码会轮换",
-    "autoUpdate": "可选；false 关闭推送前版本检查（默认开启；落后只提示重装，不自动覆盖文件）",
+    "autoUpdate": "可选；false 关闭推送前版本检查（默认开启；落后先问是否升级，不自动覆盖文件）",
     "accounts": "可用公众号；selected:true 为默认；推送可用 name 或 appId",
     "instances": "可用云电脑；selected:true 为默认；推送可用 name 或 instanceId",
     "defaultTargetScope": "向导固定 all；CLI 可覆盖为 environment | account"
