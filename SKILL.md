@@ -2,7 +2,7 @@
 name: aigc-web-push · AI内容生成与全网推送
 slug: aigc-web-push
 displayName: aigc-web-push · AI内容生成与全网推送
-version: 3.6.2
+version: 3.6.3
 summary: AI 生成文章/图文/视频，并推送到微信公众号或云电脑全网发布
 license: MIT
 description: 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
@@ -10,7 +10,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.6.2**
+**版本 3.6.3**
 
 ## 文件路径与作用
 
@@ -18,7 +18,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 | --- | --- | --- |
 | **SKILL.md** | `aigc-web-push/` | 本说明 |
 | **design.md** | 同上 | HTML 格式规范（文章 / 贴图 / 封面） |
-| **remotion-video.md** | 同上 | Remotion 视频成片规范 |
+| **remotion-video.md** | 同上 | 兜底成片规范；收口可引用 §7.1 配乐、§3.2 封面 |
 | **Humanizer-zh.md** / **Humanizer.md** | 同上 | 去 AI 味（中 / 英） |
 | **config.json** | 同上 | 配置向导生成后的真实配置 |
 | **config.example.json** | 同上 | 字段说明 + 示例 |
@@ -167,18 +167,34 @@ EOF
 
 ### 视频（Remotion）
 
-必须按 `remotion-video.md` 成片，再推云电脑。公众号不支持视频；云电脑须已绑定 `contentType=video` 的账号。
+公众号不支持视频。推送仅云电脑；账号须已绑定 `contentType=video`。
 
-1. 在作品目录内创建 `remotion/` 等子目录，**不要**把 Remotion 工程建在技能根目录。
-2. 准备 Remotion Agent Skills 后编码：
-   - 已有 Remotion / `@remotion/cli`：`npx remotion skills add`
-   - 尚未安装 Remotion：`npx skills add remotion-dev/skills`
-   - 加载 `remotion-best-practices`；写场景加载 `remotion-markup`；查 API 用 `remotion-docs` 或官网文档。
-   - 无法安装时告知用户并查官方文档，禁止凭记忆硬写。
-3. 背景音乐可选：有配置则按 `remotion-video.md` §7.1 搜平台音乐；无配置则提示可走向导配乐，用户也可不登录——无 BGM 或用户自备音乐继续成片，**不得因未登录而中断视频制作**。
-4. 流程：旁白文案 → 锁定 TTS → 字词级对齐 → 字幕 → 分镜 → Remotion → 渲染 → 验收。
-5. 成片：`works/.../out/aigc-video.mp4`；可选 `cover.html` 或 `cover.png`（作品目录或 `out/`；有图优先）。
-6. 推送时须带 **标题** 与 **描述**（`description`，分享摘要）；封面自动附带。
+本技能负责：分流、作品目录、成片路径、封面、推送、可选平台配乐。制作与验收以**选定能力的文档**为准，禁止凭本节或记忆开写。
+
+1. **作品目录** — `works/<日期>-<主题>/`；工程、音频、成片均在此，禁止写入技能根目录。
+
+2. **分流（只选一个；看片子怎么讲，不看题材名）**
+
+| 判断 | 能力 |
+| --- | --- |
+| 产品/网站/App 演示，画面主体是真实 UI/页面 | `video-shotcraft` |
+| 有旁白/口播/讲解（科普、解读、评测、观点等） | `video-talkcraft` |
+| 皆不明显，或自由视觉/无旁白 | `remotion-video.md` + Remotion 官方 Skills |
+
+用户点名从其点名；歧义则问清后二选一，禁止并行；仍不清则 `remotion-video.md`。
+
+3. **选定 shotcraft / talkcraft 后（写代码前完成）**
+   - 未装则 `npx skills add Vincentwei1021/video-shotcraft` 或 `…/video-talkcraft`；失败则改 `remotion-video.md` 并告知用户。
+   - 定位 skill 目录（`~/.agents/skills/`、`~/.claude/skills/`、`~/.codex/skills/` 或 CLI 提示路径），确认有 `SKILL.md`。
+   - **完整阅读**该 `SKILL.md`，再按其指示阅读 `references/` 等。
+   - 制作与验收只服从该 skill；工程在当前作品目录；成片为 `out/aigc-video.mp4`。
+
+4. **选定 `remotion-video.md` 后** — 安装 Remotion Skills（有 `@remotion/cli`：`npx remotion skills add`；否则 `npx skills add remotion-dev/skills`），加载 `remotion-best-practices`（场景 `remotion-markup`，API `remotion-docs` 或官网），完整执行 `remotion-video.md`。无法安装则告知用户并查官方文档，禁止凭记忆硬写。
+
+5. **配乐（可选）** — 用户指定 → 有配置则按 `remotion-video.md` §7.1 下载到作品 `audio/` → 交当前能力按其音频规则使用；无配置不阻断成片。
+
+6. **发布收口** — `out/aigc-video.mp4`；`push.js`（标题 + 描述）。工作台/剪映等不替代本通道。
+   - **封面：** 成片后若作品目录或 `out/` 尚无封面，仅按 `remotion-video.md` §3.2 补：优先 `cover.png`（可用 AI 图，仅作封面），否则 `cover.html`。推送时有图优先。
 
 ---
 

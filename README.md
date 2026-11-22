@@ -1,6 +1,6 @@
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.6.2**
+**版本 3.6.3**
 
 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号或经由云电脑推送至全球任意站点。
 
@@ -9,7 +9,7 @@
 - **扫码配置** — 授权公众号 / 默认云电脑（不预选环境或账号）
 - **一作品一目录** — 产出放在 `works/<日期>-<主题>/`，技能目录只留技能与配置
 - **图文生成** — `design.md` + Humanizer
-- **视频创作** — `remotion-video.md` + Remotion Agent Skills
+- **视频创作** — 分流 shotcraft / talkcraft / `remotion-video.md`；本技能收口目录、封面、推送
 - **灵活推送** — 可按名称指定云电脑 / 环境 / 账号
 - **版本检查** — 推送前对照远端版本；有新版本只问是否升级
 
@@ -31,7 +31,7 @@ works/20261117-demo/
 ```
 
 - 文章 / 贴图：按 `design.md`
-- 视频：按 `remotion-video.md`，先装并加载 Remotion Skills
+- 视频：见 SKILL「视频」
 
 ### 3. 推送
 
@@ -51,7 +51,7 @@ node push.js cloud - resolve video "抖音主号" account
 
 - **SKILL.md** — 完整说明  
 - **design.md** — HTML（文章 / 贴图 / 封面）  
-- **remotion-video.md** — 视频成片规范  
+- **remotion-video.md** — 兜底路径成片规范  
 - **config.example.json** — 配置字段  
 
 ## 注意
