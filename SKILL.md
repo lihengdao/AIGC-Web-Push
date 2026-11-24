@@ -2,7 +2,7 @@
 name: aigc-web-push · AI内容生成与全网推送
 slug: aigc-web-push
 displayName: aigc-web-push · AI内容生成与全网推送
-version: 3.6.10
+version: 3.6.11
 summary: AI 生成文章/图文/视频，并推送到微信公众号或云电脑全网发布
 license: MIT
 description: 支持通过 AI 生成文章、图文卡片与视频，并推送到微信公众号（无需泄露公众号 Secret，无需配置 IP 白名单）或经由云电脑推送至全球任意站点；兼容其它技能产出的文章、图片与视频。
@@ -10,7 +10,7 @@ description: 支持通过 AI 生成文章、图文卡片与视频，并推送到
 
 # aigc-web-push · AI内容生成与全网推送
 
-**版本 3.6.10**
+**版本 3.6.11**
 
 ## 文件路径与作用
 
@@ -62,7 +62,7 @@ works/20261117-gugong-ye-you/
 works/20261117-gugong-ye-you/
   remotion/            # Remotion 工程
   audio/               # TTS、音乐、音效
-  out/aigc-video.mp4   # 成片
+  out/gugong-ye-you.mp4  # 成片 out/<主题>.mp4
   cover.html           # 可选封面 HTML；也可放在 out/ 下
   cover.png            # 可选封面图（有则优先；作品目录或 out/）
 ```
@@ -171,7 +171,7 @@ EOF
 
 本技能负责：分流、作品目录、成片路径、公共质量底线、封面、推送、配乐与音效。制作流水线与镜头语法以**选定能力的文档**为准，禁止凭本节或记忆开写。**第 2–4、8–9 条及所引 `design-video.md` 条款对一切能力生效**；与能力文档冲突时以本节为准。写代码前满足第 2–4 条；推送前通过第 9 条。
 
-1. **作品目录** — `works/<日期>-<主题>/`；工程、音频、成片均在此，禁止写入技能根目录。
+1. **作品目录** — `works/<日期>-<主题>/`；工程、音频、成片均在此，禁止写入技能根目录。成片路径：`out/<主题>.mp4`。
 
 2. **画面与素材** — 主体为**程序化绘制**（Remotion / SVG / Canvas / CSS / R3F 等）。禁止为填镜头搜索、下载或采集图库照片、库存视频、网页截图或实拍；禁止用 AI 生成图/视频作主体镜头（封面除外）。**仅当用户明确上传或授权**外部素材时方可使用，并核实许可。能力文档中的采图、截图、B-roll、素材闸门要求与本条冲突时，跳过并以程序化等价镜头继续。画不准、质感不够或主题不易程序化时，按 `design-video.md` §3.2 依次换画法、换讲法或收窄表达，并完成完整成片。
 
@@ -193,13 +193,13 @@ EOF
    - 未装则 `npx skills add Vincentwei1021/video-shotcraft` 或 `…/video-talkcraft`；失败则改 `design-video.md` 并告知用户。
    - 定位 skill 目录（`~/.agents/skills/`、`~/.claude/skills/`、`~/.codex/skills/` 或 CLI 提示路径），确认有 `SKILL.md`。
    - **完整阅读**该 `SKILL.md`，再按其指示阅读 `references/` 等。
-   - 分镜、镜头配方与工程从其文档；与第 2–4 条冲突的采图、截图、库存素材或中途逐步确认要求，按本节公共底线执行。工程在当前作品目录；成片固定为 `out/aigc-video.mp4`。
+   - 分镜、镜头配方与工程从其文档；与第 2–4 条冲突的采图、截图、库存素材或中途逐步确认要求，按本节公共底线执行。工程与成片在当前作品目录（第 1 条）。
 
 7. **选定 `design-video.md` 后** — 安装 Remotion Skills（有 `@remotion/cli`：`npx remotion skills add`；否则 `npx skills add remotion-dev/skills`），加载 `remotion-best-practices`（场景 `remotion-markup`，API `remotion-docs` 或官网），完整执行 `design-video.md`（含 §2 / §3.1 / §6 / §11）。无法安装则告知用户并查阅官方文档，禁止凭记忆硬写。
 
 8. **配乐与音效** — 遵守 `design-video.md` §7。配乐：用户指定 → 有配置则按 §7.1 下载到作品 `audio/` → 否则用其它曲库；接入时间线并按 §7.5 混音与机器判据验收（对白段音乐相对旁白工作电平低约 12～18 dB，停顿段恢复；侧链压低非静音）。音效：分镜列出动作点并同步取材接入。除用户明确静音外，成片须有可感知配乐；有动作点须有同步音效。禁止为对齐配乐而变速旁白。
 
-9. **发布收口** — 唯一成片：`out/aigc-video.mp4`；`push.js`（标题 + 描述）。剪映工程、工作台、本地 preview 不替代本通道。
+9. **发布收口** — 唯一成片：`out/<主题>.mp4`；`push.js`（标题 + 描述，面向读者）。剪映工程、工作台、本地 preview 不替代本通道。
    - **封面：** 作品目录或 `out/` 若无封面，按 §3.2 补：`cover.png`（可用 AI 图，仅作封面）或 `cover.html`；推送时有图优先。
    - **技术验收：** 可播放、音画同步、无黑屏或缺资源；有旁白则字幕对齐且速率为 1.0。
    - **视觉与正文验收：** 对照第 2–4、8 条与 `design-video.md` §3.1 / §3.2 / §6.5 / §7 / §11；用时间码标出若干「对象—变化—结果」镜头；确认开合、开场运动、换方案、配乐接入与 §7.5 可感知、动作点音效；旁白、字幕、画面文字无 §6.5 元话术。技术通过不表示画面或声音合格；主段若为信息卡、方块连线、无变化讲解、缺乏可见动态、含元话术，或无静音例外却无配乐 / 配乐不可感知 / 有动作点却无同步音效，须返修重渲。
@@ -261,8 +261,8 @@ node push.js cloud - html ../works/20261117-demo/main.html article draft account
 node push.js cloud - img ../works/20261117-demo/poster.png "标题" "描述" draft
 
 # 云电脑 · 视频（标题 + 描述 + 可选封面）
-node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" "描述" draft
-node push.js cloud - video ../works/20261117-demo/out/aigc-video.mp4 "标题" "描述" draft account "抖音主号"
+node push.js cloud - video ../works/20261117-gugong-ye-you/out/gugong-ye-you.mp4 "故宫夜游指南" "三条路线带你逛亮灯后的故宫。" draft
+node push.js cloud - video ../works/20261117-gugong-ye-you/out/gugong-ye-you.mp4 "故宫夜游指南" "三条路线带你逛亮灯后的故宫。" draft account "抖音主号"
 ```
 
 字段对齐 auto-publish / design 前端：`title`、`description`、封面（`cover.png` 优先，否则文章 `*_cover.html` / 视频 `cover.html`）。
