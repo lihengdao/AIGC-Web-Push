@@ -7,12 +7,13 @@
 const fs = require('fs');
 const path = require('path');
 const https = require('https');
-const http = require('http');
 
 const SKILL_SLUG = 'aigc-web-push';
 const REGISTRY = 'https://clawhub.ai';
 const CHECK_TTL_MS = 24 * 60 * 60 * 1000;
 const REQUEST_TIMEOUT_MS = 12_000;
+const MAX_RESPONSE_BYTES = 1024 * 1024;
+const REGISTRY_HOST = new URL(REGISTRY).hostname;
 
 function skillDir() {
   return __dirname;
@@ -99,16 +100,28 @@ function requestBuffer(urlString, redirects = 0) {
       reject(new Error('too many redirects'));
       return;
     }
-    const u = new URL(urlString);
-    const lib = u.protocol === 'http:' ? http : https;
-    const req = lib.request(
+
+    let u;
+    try {
+      u = new URL(urlString);
+    } catch {
+      reject(new Error('invalid update registry URL'));
+      return;
+    }
+    // The updater only talks to the configured HTTPS registry. Do not follow
+    // redirects to HTTP, localhost, private networks, or unrelated hosts.
+    if (u.protocol !== 'https:' || u.hostname !== REGISTRY_HOST) {
+      reject(new Error('blocked update registry URL / redirect target'));
+      return;
+    }
+
+    const req = https.request(
       {
-        protocol: u.protocol,
         hostname: u.hostname,
-        port: u.port || (u.protocol === 'http:' ? 80 : 443),
+        port: u.port || 443,
         path: u.pathname + u.search,
         method: 'GET',
-        headers: { Accept: '*/*', 'User-Agent': 'aigc-web-push-check-update' },
+        headers: { Accept: 'application/json', 'User-Agent': 'aigc-web-push-check-update' },
       },
       (res) => {
         if (
@@ -122,7 +135,15 @@ function requestBuffer(urlString, redirects = 0) {
           return;
         }
         const chunks = [];
-        res.on('data', (c) => chunks.push(c));
+        let totalBytes = 0;
+        res.on('data', (c) => {
+          totalBytes += c.length;
+          if (totalBytes > MAX_RESPONSE_BYTES) {
+            req.destroy(new Error(`update response exceeds ${MAX_RESPONSE_BYTES} bytes`));
+            return;
+          }
+          chunks.push(c);
+        });
         res.on('end', () => {
           const buf = Buffer.concat(chunks);
           if (res.statusCode < 200 || res.statusCode >= 300) {
